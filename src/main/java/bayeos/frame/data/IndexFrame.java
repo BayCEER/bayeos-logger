@@ -15,6 +15,15 @@ public class IndexFrame {
 	private HashMap<Integer,Number> values;
 	private NumberType numberType;
 		
+	public IndexFrame(NumberType numberType, Number...values){
+		this.numberType = numberType;		
+		HashMap<Integer, Number> v = new HashMap<>();
+		for(int i=0;i<values.length;i++){
+			v.put(i+1, values[i]);			
+		}
+		this.values = v;
+	}
+	
 	public IndexFrame(NumberType numberType, HashMap<Integer, Number> values){
 		this.numberType = numberType;
 		this.values = values;

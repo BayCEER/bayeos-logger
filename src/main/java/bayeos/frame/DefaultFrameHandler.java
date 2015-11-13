@@ -2,10 +2,10 @@ package bayeos.frame;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public abstract class DefaultFrameHandler implements FrameHandler {
 	
@@ -13,7 +13,7 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	private String origin;
 	private Long timestamp;
 	private Integer rssi;	
-	private Map<String,Set<Integer>> originMap = new HashMap<>();
+	private Map<String,SortedSet<Integer>> originMap = new HashMap<>();
 	
 	private String defaultOrigin;
 	
@@ -30,7 +30,7 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	
 	
 	public void resetHandler(){
-		this.origin = defaultOrigin; 
+		this.origin = this.defaultOrigin; 
 		this.timestamp = new Date().getTime();
 	}
 		
@@ -46,7 +46,7 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	}
 
 	// Calculated by handler
-	public Map<String, Set<Integer>> getOriginMap(){		
+	public Map<String, SortedSet<Integer>> getOriginMap(){		
 		return originMap;
 	}
 
@@ -103,20 +103,41 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	
 	@Override
 	public void onDataFrame(byte type, Hashtable<Integer, Float> values) {
-		addOriginKey();
-		originMap.get(getOrigin()).addAll(values.keySet());		
+		addOriginKey();						
+		
+		SortedSet<Integer> oldKeys = originMap.get(getOrigin());		
+		values.keySet().removeAll(oldKeys);
+		
+		if (values.keySet().size()>0){
+			originMap.get(getOrigin()).addAll(values.keySet());			
+			onNewChannels(getOrigin(), originMap.get(getOrigin()));
+		}		
 	}
 	
 	@Override
 	public void onDataFrameEnd() {
 		resetHandler();		
 	}
+	
+	
+	public void onNewOrigin(String origin){
+		
+		
+	}
+	
+	public void onNewChannels(String origin, SortedSet<Integer> channels){
+		
+	};
+	
 
 	private void addOriginKey() {
 		if (!originMap.containsKey(getOrigin())){
-			originMap.put(getOrigin(), new HashSet<Integer>(10));	
+			originMap.put(getOrigin(), new TreeSet<Integer>());	
+			onNewOrigin(getOrigin());
 		}
 	}
+	
+
 	
 	@Override
 	public void onError(String message) {	

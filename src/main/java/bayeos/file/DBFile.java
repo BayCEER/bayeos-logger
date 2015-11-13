@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
+import java.util.SortedSet;
 import java.util.TimeZone;
 
 import bayeos.frame.DefaultFrameHandler;
@@ -53,15 +54,26 @@ public class DBFile {
 				super.onError(message);
 				System.out.println("#\"Error\":\"" + message + "\"");
 			}
-
+			
+			@Override
+			public void onNewOrigin(String origin) {
+				super.onNewOrigin(origin);
+				System.out.println("#\"New Origin\":\"" + origin + "\"");			
+			}
+			
+			@Override
+			public void onNewChannels(String origin, SortedSet<Integer> channels) {
+				super.onNewChannels(origin, channels);
+				System.out.println("#\"New Channels:" + channels +  " for Origin\":\"" + origin + "\"");
+			}
+			
 			@Override
 			public void onDataFrame(byte type, Hashtable<Integer, Float> values) {
 				super.onDataFrame(type, values);
-//				StringBuilder sb = new StringBuilder();
-//				sb.append(getOrigin()).append(",").append(df.format(getTimeStamp())).append(getCSV(values));
-//				System.out.println(sb.toString());
-//				System.out.println(sb.toString());
+				System.out.println(getTimeStamp() + "," + getCSV(values));
 			}
+
+			
 		};
 		FrameParser parser = new FrameParser(myHandler);
 		byte[] data = null;
