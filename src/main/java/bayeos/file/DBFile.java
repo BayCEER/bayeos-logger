@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -43,34 +44,30 @@ public class DBFile {
 	public void read(InputStream in) throws IOException {
 		DBReader r = new DBReader(in);
 		DefaultFrameHandler myHandler = new DefaultFrameHandler(origin) {
+			
 			@Override
-			public void onMessage(String message) {
-				super.onMessage(message);
+			public void onMessage(String origin, Date timeStamp, String message) {
 				System.out.println("#\"Message\":\"" + message + "\"");
 			}
-
+						
 			@Override
-			public void onError(String message) {
-				super.onError(message);
+			public void onError(String origin, Date timeStamp, String message) {				
 				System.out.println("#\"Error\":\"" + message + "\"");
 			}
 			
 			@Override
 			public void onNewOrigin(String origin) {
-				super.onNewOrigin(origin);
 				System.out.println("#\"New Origin\":\"" + origin + "\"");			
 			}
 			
 			@Override
 			public void onNewChannels(String origin, SortedSet<Integer> channels) {
-				super.onNewChannels(origin, channels);
 				System.out.println("#\"New Channels:" + channels +  " for Origin\":\"" + origin + "\"");
 			}
 			
 			@Override
-			public void onDataFrame(byte type, Hashtable<Integer, Float> values) {
-				super.onDataFrame(type, values);
-				System.out.println(getTimeStamp() + "," + getCSV(values));
+			public void onDataFrame(String origin, Date timeStamp, Hashtable<Integer, Float> values, Integer rssi) {
+				System.out.println(df.format(getTimeStamp())  + getCSV(values));
 			}
 
 			
