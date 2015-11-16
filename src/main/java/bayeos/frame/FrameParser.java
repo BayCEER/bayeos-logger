@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Hashtable;
 
 import bayeos.binary.ByteArray;
+import bayeos.frame.DateAdapter;
 
 
 public class FrameParser {
@@ -74,7 +75,7 @@ public class FrameParser {
 				break;
 			case FrameConstants.TimestampFrame:	
 				long d = ByteArray.fromByteUInt32(bf);				
-				handler.onTimeStamp(d);
+				handler.onTimeStamp(DateAdapter.getDate(d).getTime());
 				break;
 			case FrameConstants.MillisecondTimestampFrame:
 				handler.onMillisecond(new Date(bf.getLong()));				
