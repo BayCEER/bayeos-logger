@@ -81,10 +81,12 @@ public class FrameParser {
 				handler.onMillisecond(new Date(bf.getLong()));				
 				break;
 			case FrameConstants.OriginFrame:
-				int length = bf.get() & 0xff;
+				int length = bf.get() & 0xff;				
 				String o = "";
-				if (length > 0) {					
-					o = new String(getRemaining(bf));					
+				if (length > 0) {
+					byte[] s = new byte[length];
+					bf.get(s);
+					o = new String(s);					
 				}
 				handler.onOriginFrame(o);
 				break;
