@@ -53,10 +53,10 @@ public class FrameParser {
 				handler.onResponse(bf.get(), getRemaining(bf));
 				break;
 			case (FrameConstants.Message):
-				handler.onMessage(new String(getRemaining(bf)));
+				handler.onMessage(getString(bf));
 				break;
 			case (FrameConstants.Error):
-				handler.onError(new String(getRemaining(bf)));
+				handler.onError(getString(bf));
 				break;
 			case FrameConstants.RoutedFrame:
 				Short myId = bf.getShort();
@@ -151,6 +151,17 @@ public class FrameParser {
 	
 	public FrameHandler getHandler() {
 		return handler;
+	}
+	
+	private String getString(ByteBuffer bf){
+		StringBuffer s = new StringBuffer(bf.remaining());
+		while(bf.hasRemaining()){
+			byte b = bf.get();
+			if (b!=0x00){
+				s.append((char)b);	
+			}			
+		}
+		return s.toString();
 	}
 	
 	

@@ -1,7 +1,6 @@
 package bayeos.frame;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,28 +66,59 @@ public class FrameParserTest {
 	@Test
 	public void originFrame() throws FrameParserException{
 		OriginFrame f = new OriginFrame("dummy", new DataFrame(NumberType.Float32, 1.0F,2.0F,3.0F).getBytes());		
-		DefaultFrameHandler df = new DefaultFrameHandler() {
+		FrameParser p = new FrameParser(new DefaultFrameHandler() {
 			@Override
 			public void onDataFrame(String origin, Date timeStamp, Hashtable<Integer, Float> values, Integer rssi) {				
-				System.out.println(origin + ":" + timeStamp + ":" + values);			
+				assertEquals("dummy",origin);
+				assertNotNull(timeStamp);
+				assertEquals(3, values.size());
+				assertEquals(1.0F, (float)values.get(1),0.1F);
+				assertEquals(2.0F, (float)values.get(2),0.1F);
+				assertEquals(3.0F, (float)values.get(3),0.1F);
 			}
-		};
-		
-		FrameParser p = new FrameParser(df);	
+		});	
 		p.parse(f.getBytes());
 				
 	}
 	
+	@Test
+	public void msgFrame() throws FrameParserException {
+		StringFrame msg = new StringFrame(FrameConstants.Message, "Hello again");		
+		FrameParser p = new FrameParser(new DefaultFrameHandler() {
+			@Override
+			public void onMessage(String message) {
+					assertEquals("Hello again",message);
+			}
+		});
+		p.parse(msg.getBytes());
+	}
+	
 	
 	@Test
-	public void delayedUint8() throws FrameParserException {
-		DelayedFrame f = new DelayedFrame(100000, new DataFrame(NumberType.UInt8,12,2).getBytes());
-		
+	public void nullBytesError() throws FrameParserException {
+		StringFrame msg = new StringFrame(FrameConstants.Error, "Null bytes\000\000");				
+		FrameParser p = new FrameParser(new DefaultFrameHandler() {
+			@Override
+			public void onMessage(String message) {
+					assertEquals("Null bytes",message);
+			}
+		});
+		p.parse(msg.getBytes());
+		 
+	}
+	
+	
+	
+	@Test
+	public void delayedFrame() throws FrameParserException {
 		final Date now = new Date();
+		
+		DelayedFrame f = new DelayedFrame(5000, new DataFrame(NumberType.UInt8,12,2).getBytes());
+		
 		DefaultFrameHandler df = new DefaultFrameHandler() {
 			@Override
 			public void onDataFrame(String origin, Date timeStamp, Hashtable<Integer, Float> values, Integer rssi) {				
-				System.out.println(origin + ":" + timeStamp.getTime() + ":" + values);			
+				assertTrue(now.getTime()>timeStamp.getTime());			
 			}
 		};
 		
