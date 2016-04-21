@@ -17,32 +17,28 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	private String defaultOrigin;
 
 	public DefaultFrameHandler() {
+		initFrame();
+	}
+
+	public DefaultFrameHandler(String defaultOrigin) {
+		this.defaultOrigin = defaultOrigin;
+		initFrame();
+	}
+
+	private void initFrame() {
+		this.origin = this.defaultOrigin;
 		this.timestamp = new Date().getTime();
 		this.rssi = null;
 	}
 
-	public DefaultFrameHandler(String defaultOrigin) {
-		this();
-		this.origin = defaultOrigin;
-		this.defaultOrigin = defaultOrigin;
-	}
-
-	public void resetHandler() {
-		this.origin = this.defaultOrigin;
-		this.timestamp = new Date().getTime();
-	}
-
-	// Calculated by handler
 	public String getOrigin() {
 		return origin;
 	}
 
-	// Calculated by handler
 	public Date getTimeStamp() {
 		return new Date(timestamp);
 	}
 
-	// Calculated by handler
 	public Map<String, SortedSet<Integer>> getOriginMap() {
 		return originMap;
 	}
@@ -50,6 +46,12 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	public Integer getRssi() {
 		return rssi;
 	}
+	
+	@Override
+	public void endOfFrame() {
+		initFrame();		
+	}
+
 
 	@Override
 	public void onDelay(long millis) {
@@ -125,14 +127,10 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 		}
 						
 		onDataFrame(origin, getTimeStamp(), values, getRssi());
-		
+		initFrame();		
 	}
 
-	@Override
-	public void onDataFrameEnd() {
-		resetHandler();
-	}
-
+	
 	private void addOriginKey() {
 		if (!originMap.containsKey(getOrigin())) {
 			originMap.put(getOrigin(), new TreeSet<Integer>());

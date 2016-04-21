@@ -5,7 +5,6 @@ import java.util.Hashtable;
 
 public interface FrameHandler {
 	void onDataFrame(byte type, Hashtable<Integer, Float> values) ; // 0x1
-	void onDataFrameEnd(); 
 	void onCommand(byte type, byte[] value) ;						// 0x2
 	void onResponse(byte type, byte[] value); 						// 0x3
 	void onMessage(String message);									// 0x4
@@ -16,6 +15,8 @@ public interface FrameHandler {
 	void onTimeStamp(long time);									// 0x9
 	void onOriginFrame(String origin);								// 0xb
 	void onMillisecond(Date time);									// 0xc
+	void endOfFrame();
+	
 	
 	
 }

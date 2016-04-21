@@ -95,7 +95,7 @@ public class FrameParser {
 				// log.warn("Unknown frame type:" + frameType);
 			}
 		}
-
+		handler.endOfFrame();
 	}
 
 	private void parseDataFrame(ByteBuffer bf) throws FrameParserException {
@@ -142,7 +142,6 @@ public class FrameParser {
 			}
 		}
 		handler.onDataFrame(frameType, values);
-		handler.onDataFrameEnd();
 	}
 
 	public void setFrameHandler(FrameHandler handler) {
