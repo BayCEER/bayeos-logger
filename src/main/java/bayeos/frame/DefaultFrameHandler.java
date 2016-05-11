@@ -1,18 +1,17 @@
 package bayeos.frame;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 public abstract class DefaultFrameHandler implements FrameHandler {
 
 	private String origin;
 	private Long timestamp;
 	private Integer rssi;
-	private Map<String, SortedSet<Integer>> originMap = new HashMap<>();
+	private Map<String, List<String>> originMap = new Hashtable<>();
 
 	private String defaultOrigin;
 
@@ -39,7 +38,7 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 		return new Date(timestamp);
 	}
 
-	public Map<String, SortedSet<Integer>> getOriginMap() {
+	public Map<String, List<String>> getOriginMap() {
 		return originMap;
 	}
 
@@ -109,13 +108,13 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	}
 
 	@Override
-	public void onDataFrame(byte type, Hashtable<Integer, Float> values) {
+	public void onDataFrame(byte type, Hashtable<String, Float> values) {
 		addOriginKey();		
 		String origin = getOrigin();		
-		SortedSet<Integer> oldKeys = originMap.get(origin);		
-		SortedSet<Integer> newKeys = new TreeSet<Integer>();
+		List<String> oldKeys = originMap.get(origin);		
+		List<String> newKeys = new ArrayList<String>();
 		
-		for(Integer channelNr: values.keySet()){
+		for(String channelNr: values.keySet()){
 			if (!oldKeys.contains(channelNr)){
 				newKeys.add(channelNr);				
 			}
@@ -133,7 +132,7 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	
 	private void addOriginKey() {
 		if (!originMap.containsKey(getOrigin())) {
-			originMap.put(getOrigin(), new TreeSet<Integer>());
+			originMap.put(getOrigin(), new ArrayList<String>());
 			onNewOrigin(getOrigin());
 		}
 	}
@@ -142,11 +141,11 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 
 	}
 
-	public void onNewChannels(String origin, SortedSet<Integer> channels) {
+	public void onNewChannels(String origin, List<String> channels) {
 
 	}
 
-	public void onDataFrame(String origin, Date timeStamp, Hashtable<Integer, Float> values, Integer rssi) {
+	public void onDataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
 
 	}
 

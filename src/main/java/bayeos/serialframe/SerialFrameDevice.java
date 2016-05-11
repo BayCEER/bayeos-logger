@@ -114,6 +114,9 @@ public class SerialFrameDevice implements SerialFrameInterface {
 		}
 
 	}
+	
+	
+	
 
 	@Override
 	public void writeFrame(byte apiType, byte[] data) {

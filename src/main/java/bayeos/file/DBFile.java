@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.SortedSet;
+import java.util.List;
 import java.util.TimeZone;
 
 import bayeos.frame.DefaultFrameHandler;
@@ -61,16 +61,15 @@ public class DBFile {
 			}
 			
 			@Override
-			public void onNewChannels(String origin, SortedSet<Integer> channels) {
+			public void onNewChannels(String origin, List<String> channels) {
 				System.out.println("#\"New Channels:" + channels +  " for Origin\":\"" + origin + "\"");
 			}
 			
 			@Override
-			public void onDataFrame(String origin, Date timeStamp, Hashtable<Integer, Float> values, Integer rssi) {
-				System.out.println(df.format(getTimeStamp())  + getCSV(values));
+			public void onDataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
+				System.out.println(df.format(getTimeStamp())  + ":" +  values.toString() );
 			}
 
-			
 		};
 		FrameParser parser = new FrameParser(myHandler);
 		byte[] data = null;
@@ -84,22 +83,6 @@ public class DBFile {
 		System.out.println(myHandler.getOriginMap());
 	}
 
-	@SuppressWarnings("unused")
-	private String getCSV(Hashtable<Integer, Float> values) {
-		StringBuilder sb = new StringBuilder();
-		Integer max = 0;
-		for (Integer nr : values.keySet()) {
-			if (max <= nr)
-				max = nr;
-		}
-		for (int i = 1; i <= max; i++) {
-			sb.append(',');
-			Float v = values.get(i);
-			if (v != null) {
-				sb.append(v);
-			}
-		}
-		return sb.toString();
-	}
+	
 
 }

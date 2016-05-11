@@ -46,7 +46,8 @@ public class FrameConstants {
 	public static final int FrameWithOffset = 0x0; 	
 	public static final byte FrameWithoutOffset = 0x20; 		
 	public static final byte FrameWithChannel = 0x40;
-	
+	public static final byte FrameWithLabel = 0x60;
+		
 		     
 
 	

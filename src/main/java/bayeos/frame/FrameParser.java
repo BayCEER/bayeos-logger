@@ -108,23 +108,38 @@ public class FrameParser {
 		}
 		
 		int fm = frameType & FrameConstants.FrameMask;
-		if (!(fm == FrameConstants.FrameWithOffset || fm == FrameConstants.FrameWithoutOffset || fm == FrameConstants.FrameWithChannel)){
+		if (fm != FrameConstants.FrameWithOffset && 
+			fm != FrameConstants.FrameWithoutOffset && 
+			fm != FrameConstants.FrameWithChannel &&
+			fm != FrameConstants.FrameWithLabel) {
 			throw new FrameParserException(2, "Unknown data frame type:" + fm);
 		}
 								
-		int channel = 0;				
+		String channel = null;
 		if (fm == FrameConstants.FrameWithOffset) {
-			channel = bf.get() & 0xff;
+			channel = String.valueOf(bf.get() & 0xff);
+		} else {
+			channel = "0";
 		}
 
-		Hashtable<Integer, Float> values = new Hashtable<Integer, Float>(30);		
+		Hashtable<String, Float> values = new Hashtable<String, Float>(30);		
 		while (bf.remaining() > 0) {
-			// Read Channel
-			if (fm == FrameConstants.FrameWithChannel) {
-				channel = bf.get() & 0xff;
-			} else {
-				channel++;
+			// Read Channel			
+			switch(fm) {
+				case(FrameConstants.FrameWithChannel):
+					channel = String.valueOf(bf.get() & 0xff); 
+					break;
+				case(FrameConstants.FrameWithLabel):
+					// Label length
+					byte[] ba = new byte[bf.get() & 0xff];
+					// Label
+					bf.get(ba);
+					channel = new String(ba); 
+					break;	
+				default: 
+					channel = String.valueOf(Integer.valueOf(channel) + 1); 					
 			}
+						
 			// Read Value
 			switch (bm) {
 			case (1): // Float
