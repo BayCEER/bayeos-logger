@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import bayeos.binary.ByteArray;
+import bayeos.frame.ByteFrame;
 import bayeos.frame.FrameConstants;
 
 
@@ -16,7 +17,9 @@ public class RoutedRSSIFrame extends RoutedFrame {
 		this.RSSI = RSSI;					
 	}
 	
-	
+	public RoutedRSSIFrame(Integer myId, Integer panId, Integer RSSI, ByteFrame b) {
+		this(myId,panId,RSSI,b.getBytes());						
+	}
 	
 	public byte[] getBytes(){
 		byte[] n = new byte[6+payload.length];

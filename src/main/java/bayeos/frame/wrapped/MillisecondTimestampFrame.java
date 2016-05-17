@@ -4,11 +4,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Date;
 
+import bayeos.frame.ByteFrame;
 import bayeos.frame.FrameConstants;
 
 
 
-public class MillisecondTimestampFrame  {
+public class MillisecondTimestampFrame implements ByteFrame  {
 	
 	private Date timeStamp;
 	protected byte[] payload;
@@ -16,6 +17,10 @@ public class MillisecondTimestampFrame  {
 	public MillisecondTimestampFrame(Date timeStamp, byte[] payload) {
 		this.timeStamp = timeStamp;	
 		this.payload = payload;
+	}
+	
+	public MillisecondTimestampFrame(Date timeStamp, ByteFrame frame){
+		this(timeStamp, frame.getBytes());
 	}
 
 	

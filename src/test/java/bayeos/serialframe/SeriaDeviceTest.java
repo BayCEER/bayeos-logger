@@ -43,39 +43,39 @@ public class SeriaDeviceTest {
 	/**
 	 * Test async call to get version from logger over serial line 
 	 */
-	@Test	
-	public void readCommPortAsync() {
-	
-	    String nameExpected = "Dummy Space";	    	    		
-													
-		@SuppressWarnings("rawtypes")		
-		ReadCallback callBack = new AbstractReadCallBack<String>(){			
-			@Override
-			public void onData(byte[] data) {			
-				super.onData(data); // sets running flag
-				value = new String(Arrays.copyOfRange(data, 2, data.length));				
-			}
-		};					
-				
-		System.out.println("Sending logger command 'Get name'. ");
-		dev.writeFrame(api_data, new byte[] {0x2,0x9});													
-		dev.readFrame(callBack);	
-		
-		while(callBack.isRunning()){
-			try {
-				Thread.sleep(250);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}	
-		}
-											
-		
-		assertFalse(callBack.hasError());				
-		assertEquals(nameExpected,callBack.getValue());
-		
-		System.out.println("Close device");		
-		com.close();
-				
-		
-	}
+//	@Test	
+//	public void readCommPortAsync() {
+//	
+//	    String nameExpected = "Dummy Space";	    	    		
+//													
+//		@SuppressWarnings("rawtypes")		
+//		ReadCallback callBack = new AbstractReadCallBack<String>(){			
+//			@Override
+//			public void onData(byte[] data) {			
+//				super.onData(data); // sets running flag
+//				value = new String(Arrays.copyOfRange(data, 2, data.length));				
+//			}
+//		};					
+//				
+//		System.out.println("Sending logger command 'Get name'. ");
+//		dev.writeFrame(api_data, new byte[] {0x2,0x9});													
+//		dev.readFrame(callBack);	
+//		
+//		while(callBack.isRunning()){
+//			try {
+//				Thread.sleep(250);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}	
+//		}
+//											
+//		
+//		assertFalse(callBack.hasError());				
+//		assertEquals(nameExpected,callBack.getValue());
+//		
+//		System.out.println("Close device");		
+//		com.close();
+//				
+//		
+//	}
 }

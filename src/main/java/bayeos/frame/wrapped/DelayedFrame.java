@@ -4,15 +4,20 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import bayeos.binary.ByteArray;
+import bayeos.frame.ByteFrame;
 import bayeos.frame.FrameConstants;
 
 
-public class DelayedFrame  {
+public class DelayedFrame implements ByteFrame  {
 	
 
 	private long delay;	
 	private byte[] payload;
 		
+	
+	public DelayedFrame(long delay, ByteFrame frame){
+		this(delay, frame.getBytes());
+	}
 	
 	public DelayedFrame(long delay, byte[] payload) {
 		this.delay = delay;		

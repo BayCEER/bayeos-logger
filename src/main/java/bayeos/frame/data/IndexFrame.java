@@ -7,10 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import bayeos.binary.ByteArray;
+import bayeos.frame.ByteFrame;
 import bayeos.frame.FrameConstants;
 import bayeos.frame.FrameConstants.NumberType;
 
-public class IndexFrame {
+public class IndexFrame implements ByteFrame  {
 	
 	private HashMap<Integer,Number> values;
 	private NumberType numberType;

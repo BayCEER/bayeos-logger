@@ -39,18 +39,18 @@ public class LoggerDeviceTest {
 		System.out.println("device closed");
 	}
 	
-	@Test
-	public void setName() throws Exception {
-		System.out.println("Set name");
-		logger.setName("Hallo");
-		System.out.println("Get name");
-		assertEquals("Hallo",logger.getName());
-	}
-	
-	@Test
-	public void getName() throws Exception {
-		System.out.println("Get name");
-		assertNotNull(logger.getName());
-	}
+//	@Test
+//	public void setName() throws Exception {
+//		System.out.println("Set name");
+//		logger.setName("Hallo");
+//		System.out.println("Get name");
+//		assertEquals("Hallo",logger.getName());
+//	}
+//	
+//	@Test
+//	public void getName() throws Exception {
+//		System.out.println("Get name");
+//		assertNotNull(logger.getName());
+//	}
 
 }

@@ -2,7 +2,7 @@ package bayeos.frame;
 
 import java.nio.ByteBuffer;
 
-public class StringFrame {
+public class StringFrame implements ByteFrame {
 	String value;
 	byte type;
 	

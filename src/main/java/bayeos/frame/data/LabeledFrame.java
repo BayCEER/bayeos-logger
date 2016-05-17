@@ -5,13 +5,20 @@ import java.nio.ByteOrder;
 import java.util.Map;
 
 import bayeos.binary.ByteArray;
+import bayeos.frame.ByteFrame;
 import bayeos.frame.FrameConstants;
 import bayeos.frame.FrameConstants.NumberType;
+import utils.MapUtils;
 
-public class LabeledFrame {
+public class LabeledFrame implements ByteFrame {
 	
 	private Map<String,Number> values;
 	private NumberType numberType;
+	
+	public LabeledFrame(NumberType numberType, String map){
+		this.numberType = numberType;
+		this.values = MapUtils.getMap(map);
+	}
 	
 	public LabeledFrame(NumberType numberType, Map<String,Number> values){
 		this.numberType = numberType;

@@ -1,4 +1,4 @@
-package bayeos.frame;
+package utils;
 
 import java.util.Map;
 
@@ -13,7 +13,7 @@ import javax.script.ScriptException;
  * 
  *
  */
-public class JSEngine {
+public class MapUtils {
 	private final static ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
 		
 	/**
@@ -27,10 +27,14 @@ public class JSEngine {
 	 * @throws ScriptException
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Map<String,T> getMap(String values) throws ScriptException{
+	public static <T> Map<String,T> getMap(String values) throws IllegalArgumentException{
 		StringBuffer n = new StringBuffer("var map = ");
 		n.append(values).append(";");
-		engine.eval(n.toString());		
+		try {
+			engine.eval(n.toString());
+		} catch (ScriptException e) {
+			throw new IllegalArgumentException("Wrong argument format. Should be a valid Javascript map statement.");
+		}		
 		Object o = engine.get("map");			
 		return (Map<String, T>) o; 
 	}

@@ -5,10 +5,11 @@ import java.nio.ByteOrder;
 import java.util.Date;
 
 import bayeos.binary.ByteArray;
+import bayeos.frame.ByteFrame;
 import bayeos.frame.DateAdapter;
 import bayeos.frame.FrameConstants;
 
-public class TimestampFrame  {
+public class TimestampFrame implements ByteFrame  {
 	
 	private Date timeStamp;
 	protected byte[] payload;
@@ -17,6 +18,11 @@ public class TimestampFrame  {
 		this.timeStamp = timeStamp;	
 		this.payload = payload;
 	}
+	
+	public TimestampFrame(Date timeStamp, ByteFrame payload) {
+		this(timeStamp,payload.getBytes());
+	}
+
 
 	
 	public Date getTimeStamp() {

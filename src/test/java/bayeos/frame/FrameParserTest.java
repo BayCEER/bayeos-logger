@@ -7,9 +7,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
 
 import javax.script.ScriptException;
 
@@ -37,8 +35,10 @@ public class FrameParserTest {
 		InputStream in = null;
 		in = getClass().getResourceAsStream("/frames2.bin");
 		
+		assertNotNull(in);
+		
 						
-		FrameHandler fh = new DefaultFrameHandler() {
+		FrameHandler fh = new DefaultFrameHandler("Frame File") {
 			@Override
 			public void onDataFrame(byte type, Hashtable<String, Float> values) {
 				System.out.println(getTimeStamp());
@@ -78,7 +78,7 @@ public class FrameParserTest {
 		OriginFrame f = new OriginFrame("dummy", new DataFrame(NumberType.Float32, 1.0F,2.0F,3.0F).getBytes());		
 		FrameParser p = new FrameParser(new DefaultFrameHandler() {
 			@Override
-			public void onDataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {				
+			public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {				
 				assertEquals("dummy",origin);
 				assertNotNull(timeStamp);
 				assertEquals(3, values.size());
@@ -128,7 +128,7 @@ public class FrameParserTest {
 						
 		DefaultFrameHandler df = new DefaultFrameHandler("MyOrigin") {
 			@Override
-			public void onDataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {								
+			public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {								
 				System.out.println(timeStamp);
 			}
 		};
@@ -155,7 +155,7 @@ public class FrameParserTest {
 		
 		DefaultFrameHandler df = new DefaultFrameHandler("MyOrigin") {
 			@Override
-			public void onDataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {												
+			public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {												
 				assertEquals(ts.getTime()-10000,timeStamp.getTime());
 			}
 		};
@@ -167,13 +167,16 @@ public class FrameParserTest {
 	
 	@Test
 	public void labeledFrame() throws FrameParserException, ScriptException {
-		Map<String,Number> values = JSEngine.getMap("{'c1':1.0,'c11':11.0,'c3':3.0}");
-		LabeledFrame f = new LabeledFrame(NumberType.UInt8,values);		 
+		LabeledFrame f = new LabeledFrame(NumberType.UInt8,"{'c1':1.0,'c11':11.0,'c3':3.0}");		 
 		DefaultFrameHandler df = new DefaultFrameHandler("MyOrigin") {
 				@Override
-				public void onDataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {												
+				public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {												
 						assertEquals(3, values.size());
+						assertEquals(1f,values.get("c1"),0.1);
+						assertEquals(11f,values.get("c11"),0.1);
+						assertEquals(3f,values.get("c3"),0.1);						
 				}
+								
 		};			
 		new FrameParser(df).parse(f.getBytes());
 		

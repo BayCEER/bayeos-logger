@@ -46,27 +46,27 @@ public class DBFile {
 		DefaultFrameHandler myHandler = new DefaultFrameHandler(origin) {
 			
 			@Override
-			public void onMessage(String origin, Date timeStamp, String message) {
+			public void message(String origin, Date timeStamp, String message) {
 				System.out.println("#\"Message\":\"" + message + "\"");
 			}
 						
 			@Override
-			public void onError(String origin, Date timeStamp, String message) {				
+			public void error(String origin, Date timeStamp, String message) {				
 				System.out.println("#\"Error\":\"" + message + "\"");
 			}
 			
 			@Override
-			public void onNewOrigin(String origin) {
+			public void newOrigin(String origin) {
 				System.out.println("#\"New Origin\":\"" + origin + "\"");			
 			}
 			
 			@Override
-			public void onNewChannels(String origin, List<String> channels) {
+			public void newChannels(String origin, List<String> channels) {
 				System.out.println("#\"New Channels:" + channels +  " for Origin\":\"" + origin + "\"");
 			}
 			
 			@Override
-			public void onDataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
+			public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
 				System.out.println(df.format(getTimeStamp())  + ":" +  values.toString() );
 			}
 

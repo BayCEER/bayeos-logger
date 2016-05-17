@@ -5,10 +5,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import bayeos.binary.ByteArray;
+import bayeos.frame.ByteFrame;
 import bayeos.frame.FrameConstants;
 
 
-public class RoutedFrame  {
+public class RoutedFrame implements ByteFrame  {
 
 	protected Integer myId;
 	protected Integer panId;
@@ -21,9 +22,13 @@ public class RoutedFrame  {
 		this.payload = payload;
 	}
 	
+	public RoutedFrame(Integer myId, Integer panId,ByteFrame b) {		
+		this(myId,panId,b.getBytes());
+	}
+	
 	
 
-	public byte[] getBytes() throws IOException {
+	public byte[] getBytes()  {
 		byte[] n = new byte[5 + payload.length];
 		ByteBuffer bf = ByteBuffer.wrap(n);
 		bf.order(ByteOrder.LITTLE_ENDIAN);

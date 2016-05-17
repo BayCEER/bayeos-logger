@@ -6,7 +6,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-public abstract class DefaultFrameHandler implements FrameHandler {
+public abstract class DefaultFrameHandler implements FrameHandler, FrameEventHandler {
 
 	private String origin;
 	private Long timestamp;
@@ -88,13 +88,13 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	@Override
 	public void onMessage(String message) {
 		addOriginKey();
-		onMessage(getOrigin(), getTimeStamp(), message);
+		message(getOrigin(), getTimeStamp(), message);
 	}
 
 	@Override
 	public void onError(String message) {
 		addOriginKey();
-		onError(getOrigin(), getTimeStamp(), message);
+		error(getOrigin(), getTimeStamp(), message);
 	}
 
 	@Override
@@ -122,10 +122,10 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 				
 		if (newKeys.size()>0){
 			originMap.get(origin).addAll(newKeys);
-			onNewChannels(origin,newKeys);
+			newChannels(origin,newKeys);
 		}
 						
-		onDataFrame(origin, getTimeStamp(), values, getRssi());
+		dataFrame(origin, getTimeStamp(), values, getRssi());
 		initFrame();		
 	}
 
@@ -133,27 +133,33 @@ public abstract class DefaultFrameHandler implements FrameHandler {
 	private void addOriginKey() {
 		if (!originMap.containsKey(getOrigin())) {
 			originMap.put(getOrigin(), new ArrayList<String>());
-			onNewOrigin(getOrigin());
+			newOrigin(getOrigin());
 		}
 	}
 
-	public void onNewOrigin(String origin) {
+	
+	@Override
+	public void newOrigin(String origin) {
 
 	}
 
-	public void onNewChannels(String origin, List<String> channels) {
+	@Override
+	public void newChannels(String origin, List<String> channels) {
 
 	}
 
-	public void onDataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
+	@Override
+	public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
 
 	}
 
-	public void onMessage(String origin, Date timeStamp, String message) {
+	@Override
+	public void message(String origin, Date timeStamp, String message) {
 
 	}
 
-	public void onError(String origin, Date timeStamp, String message) {
+	@Override
+	public void error(String origin, Date timeStamp, String message) {
 
 	}
 

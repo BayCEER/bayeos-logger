@@ -4,10 +4,11 @@ package bayeos.frame.data;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import bayeos.frame.ByteFrame;
 import bayeos.frame.FrameConstants;
 import bayeos.frame.FrameConstants.NumberType;
 
-public class OffsetFrame {
+public class OffsetFrame implements ByteFrame {
 	
 	
 	private NumberType numberType;

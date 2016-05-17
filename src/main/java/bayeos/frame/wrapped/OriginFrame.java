@@ -3,9 +3,10 @@ package bayeos.frame.wrapped;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import bayeos.frame.ByteFrame;
 import bayeos.frame.FrameConstants;
 
-public class OriginFrame {
+public class OriginFrame implements ByteFrame {
 	
 	private String origin;
 	private byte[] payload;
@@ -13,6 +14,10 @@ public class OriginFrame {
 	public OriginFrame(String origin, byte[] payload) {
 		this.origin = origin;
 		this.payload = payload;
+	}
+	
+	public OriginFrame(String origin, ByteFrame b) {		
+		this(origin,b.getBytes());
 	}
 	
 	public String getOrigin() {
