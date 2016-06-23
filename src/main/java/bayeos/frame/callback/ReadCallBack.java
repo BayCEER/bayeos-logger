@@ -1,14 +1,12 @@
-package bayeos.serialframe;
+package bayeos.frame.callback;
 
-import bayeos.binary.ByteArray;
-import bayeos.serialframe.SerialFrameInterface.ReadCallback;
-
-public class AbstractReadCallBack<T> implements ReadCallback<T> {
+public abstract class ReadCallBack<T> implements SerialCallback<T> {
 	
 	public byte ack;
 	public boolean error = false;
 	public String errorMsg = "";
 	public T value;
+	
 	public boolean running = true;
 	 
 	/*
@@ -17,7 +15,7 @@ public class AbstractReadCallBack<T> implements ReadCallback<T> {
 	 * @see bayeos.serialframe.SerialFrameInterface.ReadCallback#onData(byte[])
 	 */
 	public void onData(byte[] data) {
-		System.out.println("On Data:" + ByteArray.toString(data));
+		// System.out.println("On Data:" + ByteArray.toString(data));
 		running = false;
 	}
 	
@@ -29,7 +27,7 @@ public class AbstractReadCallBack<T> implements ReadCallback<T> {
 	}
 
 	public void onAck(byte value) {
-		System.out.println("On Ack:" + ByteArray.toString(value));
+		// System.out.println("On Ack:" + ByteArray.toString(value));
 		ack = value;
 	}
 	
@@ -57,6 +55,6 @@ public class AbstractReadCallBack<T> implements ReadCallback<T> {
 	
 	
 	
-	
 
 }
+

@@ -1,15 +1,18 @@
 package bayeos.serialframe;
 
-import static bayeos.serialframe.SerialFrameConstants.ack_ok;
+import static bayeos.serialframe.SerialFrameConstants.ACK_FRAME;
+import static bayeos.serialframe.SerialFrameConstants.NACK_FRAME;
 import static bayeos.serialframe.SerialFrameConstants.api_ack;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import bayeos.binary.ByteArray;
 import bayeos.device.SerialDeviceInterface;
+import bayeos.frame.callback.ByteReadCallback;
+import bayeos.frame.callback.ReadCallBack;
 
 
 public class SerialFrameDevice implements SerialFrameInterface {
@@ -18,7 +21,8 @@ public class SerialFrameDevice implements SerialFrameInterface {
 	private ReadThread readThread;
 	private WriteThread writeThread;
 
-	private BlockingQueue<byte[]> qOut = new LinkedBlockingDeque<>(10);
+	
+	private BlockingQueue<byte[]> qOut = new ArrayBlockingQueue<byte[]>(10);
 	
 	
 	private boolean started = false;
@@ -29,34 +33,45 @@ public class SerialFrameDevice implements SerialFrameInterface {
 		this.writeThread = new WriteThread();				
 		start();
 	}
+	
+	public void close() {
+		this.stop();
+		this.device.close();
+	}
 		
 	protected class ReadThread extends Thread {
 		boolean stopped = false;
 		
-		private ReadCallback<?> callback;
+		private ReadCallBack<?> callback;
 		private InputStream in;
 		
 		SerialFrameParser parser = new SerialFrameParser(new SerialFrameHandler() {
 			@Override
 			public void onData(byte apiType, byte[] payload) {
+				System.out.println("Read [" + apiType + "]:" + ByteArray.toString(payload));
 				if (apiType == api_ack) {
 					callback.onAck(payload[0]);
 				} else {
 					callback.onData(payload);								
 					try {
-						qOut.put(SerialFrameEncoder.encodePayload(api_ack, new byte[ack_ok]));
-					} catch (InterruptedException e) {
+						device.write(ACK_FRAME);					
+					} catch (IOException e) {
 						callback.onError(e.getMessage());
-					}
+					}						
 				}
 			}
 
 			@Override
 			public void onError(String msg) {
-				callback.onError(msg);				
+				callback.onError(msg);	
+				try {
+					device.write(NACK_FRAME);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}	
-			
-			
+						
 		});	
 		
 		@Override
@@ -74,7 +89,7 @@ public class SerialFrameDevice implements SerialFrameInterface {
 			}
 		}
 
-		public void setCallback(ReadCallback<?> callback) {
+		public void setCallback(ReadCallBack<?> callback) {
 			this.callback = callback;
 		}
 
@@ -97,8 +112,7 @@ public class SerialFrameDevice implements SerialFrameInterface {
 		public void run() {
 			while (!stopped) {
 				try {
-					byte[] b = qOut.take();
-					System.out.println("Write [" + b.length + "]:" + ByteArray.toString(b));
+					byte[] b = qOut.take();					
 					device.write(b);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -119,55 +133,46 @@ public class SerialFrameDevice implements SerialFrameInterface {
 	
 
 	@Override
-	public void writeFrame(byte apiType, byte[] data) {
+	public void writeFrame(byte apiType, byte[] data) throws IOException {
 		try {
-			qOut.put(SerialFrameEncoder.encodePayload(apiType, data));
+			System.out.println("Write [" + apiType + "]:" + ByteArray.toString(data));
+			byte[] out = SerialFrameEncoder.encodePayload(apiType, data); 
+			qOut.put(out);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+			throw new IOException(e.getMessage());
+		}		
 	}
-
 	
-	public byte[] readFrame() throws IOException {
 		
-		ByteReadCallback cb = new ByteReadCallback();		
-		readThread.setCallback(cb);
-		while(!readThread.stopped && cb.isRunning()){
-			try {
-				Thread.sleep(50);
-				
-			} catch (InterruptedException e) {
-				cb.onError("Call interrupted.");				
-			}
-		}
-		
+	public byte[] readFrame() throws IOException {						
+		ByteReadCallback cb = new ByteReadCallback();
+		readFrame(cb);
 		if (cb.hasError()){
 			throw new IOException(cb.getErrorMsg());
-		}  
-		return cb.getValue();		
-		
+		} else {
+			return cb.getValue();	
+		}
 	}
 	
-			
-	public void readFrame(ReadCallback<?> cb){
+	
+		
+	public void readFrame(ReadCallBack<?> cb)  {
 		readFrame(cb, true);
 	}
 	
 		
 	@Override
-	public void readFrame(ReadCallback<?> cb, boolean blocking)  {						
+	public void readFrame(ReadCallBack<?> cb, boolean blocking)  {						
 		readThread.setCallback(cb);	
-		if (blocking){
+		if (blocking){			
 			while(!readThread.stopped && cb.isRunning()){
-				try {
-					Thread.sleep(250);
+				try {					
+					Thread.sleep(50);					
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}	
-			}
-			
-		}
-		
+			}			
+		}		
 	}
 
 	

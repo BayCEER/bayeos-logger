@@ -6,6 +6,7 @@ import static bayeos.serialframe.SerialFrameConstants.frameDelimeter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import bayeos.binary.ByteArray;
 import bayeos.binary.CheckSum;
 
 public class SerialFrameParser {
@@ -58,7 +59,7 @@ public class SerialFrameParser {
 					continue;
 				} 
 				
-				// Fire Events 												
+				// Fire Events 	
 				handler.onData((byte) api, payload);									
 			
 			}

@@ -1,10 +1,6 @@
 package bayeos.serialframe;
 
-import static bayeos.serialframe.SerialFrameConstants.api_data;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.junit.After;
@@ -12,20 +8,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 import bayeos.device.SerialDeviceInterface;
+import bayeos.frame.callback.ReadCallBack;
 import bayeos.serial.ComPortDevice;
-import bayeos.serialframe.SerialFrameInterface.ReadCallback;
+import static bayeos.serialframe.SerialFrameConstants.*;
+import static org.junit.Assert.*;
 
 public class SeriaDeviceTest {
 	
 		
-	public final String comPort = "COM10";
-	
+	public final String comPort = "COM10";	
 	SerialFrameDevice dev = null;
-	SerialDeviceInterface com = null;
-	
+	 
 	@Before
 	public void setUp() throws Exception {									
-		com = new ComPortDevice(comPort);			
+		SerialDeviceInterface com = new ComPortDevice(comPort);			
 		if (!com.open()){
 			fail("Failed to open device");
 		}		
@@ -34,48 +30,36 @@ public class SeriaDeviceTest {
 
 	@After
 	public void tearDown() throws Exception {
-		com.close();				
+		dev.close();				
 	}
-	
-	
 	
 	
 	/**
 	 * Test async call to get version from logger over serial line 
 	 */
-//	@Test	
-//	public void readCommPortAsync() {
-//	
-//	    String nameExpected = "Dummy Space";	    	    		
-//													
-//		@SuppressWarnings("rawtypes")		
-//		ReadCallback callBack = new AbstractReadCallBack<String>(){			
-//			@Override
-//			public void onData(byte[] data) {			
-//				super.onData(data); // sets running flag
-//				value = new String(Arrays.copyOfRange(data, 2, data.length));				
-//			}
-//		};					
-//				
-//		System.out.println("Sending logger command 'Get name'. ");
-//		dev.writeFrame(api_data, new byte[] {0x2,0x9});													
-//		dev.readFrame(callBack);	
-//		
-//		while(callBack.isRunning()){
-//			try {
-//				Thread.sleep(250);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}	
-//		}
-//											
-//		
-//		assertFalse(callBack.hasError());				
-//		assertEquals(nameExpected,callBack.getValue());
-//		
-//		System.out.println("Close device");		
-//		com.close();
-//				
-//		
-//	}
+	@Test	
+	public void readCommPortAsync()  {
+	
+		@SuppressWarnings("rawtypes")		
+		ReadCallBack callBack = new ReadCallBack<String>(){			
+			@Override
+			public void onData(byte[] data) {			
+				super.onData(data); // sets running flag
+				value = new String(Arrays.copyOfRange(data, 2, data.length));
+				System.out.println("Response:" + value);
+			}
+		};					
+				
+		System.out.println("Sending logger command 'Get name'. ");
+		try {
+			dev.writeFrame(api_data, new byte[] {0x2,0x9});
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}													
+		dev.readFrame(callBack);	
+		
+		assertFalse(callBack.hasError());	
+		System.out.println(callBack.getValue());							
+		
+	}
 }

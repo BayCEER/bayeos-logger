@@ -49,6 +49,7 @@ public class ComPortDevice implements SerialDeviceInterface {
 			e.printStackTrace();
 			return false;
 		} 
+		System.out.println("Device on port:" + port + " opened.");
 		return true;
 	}
 

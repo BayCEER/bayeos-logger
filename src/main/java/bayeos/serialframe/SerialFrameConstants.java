@@ -11,6 +11,12 @@ public class SerialFrameConstants {
 	
 	public final static int ack_ok = 0x1;
 	public final static int ack_nok = 0x2;
+	public final static int ack_break = 0x3;
+	
+	public static final byte[] ACK_FRAME = { frameDelimeter, 0x1, api_ack, ack_ok, (byte) 0xFC };
+	public static final byte[] NACK_FRAME = {frameDelimeter, 0x1, api_ack, ack_nok, (byte) 0xFB };
+	public static final byte[] BREAK_FRAME = { frameDelimeter, 0x1, api_ack, ack_break, (byte) 0xFA };
+
 	
 	
 }

@@ -1,20 +1,18 @@
 package bayeos.logger;
 
+import static bayeos.frame.FrameConstants.*;
+import static bayeos.logger.LoggerConstants.*;
+import static bayeos.serialframe.SerialFrameConstants.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Date;
 
 import bayeos.binary.ByteArray;
 import bayeos.frame.DateAdapter;
-import bayeos.frame.FrameConstants;
-import bayeos.frame.callback.DateCallBack;
-import bayeos.frame.callback.StringCallBack;
 import bayeos.serialframe.SerialFrameDevice;
-import static bayeos.serialframe.SerialFrameConstants.api_data;
 
 public class LoggerDevice implements ILogger {
-	
-	
 			
 	private SerialFrameDevice dev;
 	
@@ -22,160 +20,189 @@ public class LoggerDevice implements ILogger {
 		this.dev = dev;
 	}
 	
+	public void close() {
+		if (this.dev != null){
+			this.dev.close();
+		}
+	}
 	
 	@Override
 	public String getName() throws IOException {		
-		dev.writeFrame(api_data, new byte[]{FrameConstants.Command,LoggerConstants.GetName});
-		StringCallBack cb = new StringCallBack();		
-		dev.readFrame(cb);		
-		if (cb.hasError()){
-			throw new IOException(cb.getErrorMsg());
-		} else {
-			return cb.getValue();	
-		}
+		dev.writeFrame(api_data, new byte[]{Command,GetName});
+		byte[] resp = readCommandResponse(GetName);		
+		return new String(resp);		
 	}
-
-
+	
 	@Override
 	public void setName(String name) throws IOException {		
 		ByteBuffer bf = ByteBuffer.allocate(name.length()+2);
-		bf.put(FrameConstants.Command);
-		bf.put(LoggerConstants.SetName);
+		bf.put(Command);
+		bf.put(SetName);
 		bf.put(name.getBytes());						
-		dev.writeFrame(api_data,bf.array());
+		dev.writeFrame(api_data,bf.array());				
+		readCommandResponse(SetName);		
 	}
 
 
 	@Override
 	public Date getTime() throws IOException {
-		dev.writeFrame(api_data, new byte[]{FrameConstants.Command,LoggerConstants.GetTime});
-		DateCallBack cb = new DateCallBack();		
-		dev.readFrame(cb);		
-		if (cb.hasError()){
-			throw new IOException(cb.getErrorMsg());
-		} else {
-			return cb.getValue();	
-		}
+		dev.writeFrame(api_data, new byte[]{Command,GetTime});
+		byte[] resp = readCommandResponse(GetTime);
+		return DateAdapter.getDate(ByteArray.fromByteUInt32(resp));		
 	}
 
 
 	@Override
 	public Date setTime(Date date) throws IOException {
-		long secs = DateAdapter.getSeconds(date);
-		
+		long secs = DateAdapter.getSeconds(date);		
 		ByteBuffer bf = ByteBuffer.allocate(6);
-		bf.put(FrameConstants.Command);
-		bf.put(LoggerConstants.SetTime);
+		bf.put(Command);
+		bf.put(SetTime);
 		bf.put(ByteArray.toByteUInt32(secs));
-		
-		dev.writeFrame(api_data, bf.array());
-				
-		DateCallBack dc = new DateCallBack();
-		dev.readFrame(dc);
-		if (dc.hasError()){
-			throw new IOException(dc.getErrorMsg());
-		} else {
-			return dc.getValue();	
-		}
-		
+		dev.writeFrame(api_data, bf.array());		
+		byte[] resp = readCommandResponse(SetTime);
+		return DateAdapter.getDate(ByteArray.fromByteUInt32(resp));		
 	}
 
 
 	@Override
 	public int getSamplingInterval() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		dev.writeFrame(api_data, new byte[]{Command,GetSamplingInt});
+		byte[] resp = readCommandResponse(GetSamplingInt);
+		return ByteArray.fromByteInt16(resp);
+		
 	}
 
 
 	@Override
 	public void setSamplingInterval(int interval) throws IOException {
-		// TODO Auto-generated method stub
+		ByteBuffer bf = ByteBuffer.allocate(6);
+		bf.put(Command);
+		bf.put(SetSamplingInt);
+		bf.put(ByteArray.toByteInt16((short)interval));
+		dev.writeFrame(api_data,bf.array());
 		
+		readCommandResponse(SetSamplingInt);	
 	}
 
 
 	@Override
 	public Date getDateOfNextFrame() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		dev.writeFrame(api_data, new byte[]{Command,GetTimeOfNextFrame});
+		byte[] resp = readCommandResponse(GetTimeOfNextFrame);
+		return DateAdapter.getDate(ByteArray.fromByteUInt32(resp));
 	}
 
 
 	@Override
 	public long startData(int dataMode) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		dev.writeFrame(api_data, new byte[]{Command,StartData,(byte)dataMode});
+		byte[] resp = readCommandResponse(StartData);
+		return ByteArray.fromByteUInt32(resp);
 	}
 
 
 	@Override
 	public void stopData(int stopMode) throws IOException {
-		// TODO Auto-generated method stub
-		
+		breakSocket();
+		dev.writeFrame(api_data, new byte[]{Command,StopData,(byte)stopMode});
+		readCommandResponse(StopData);
 	}
 
 
 	@Override
 	public void startLiveData() throws IOException {
-		// TODO Auto-generated method stub
-		
+		dev.writeFrame(api_data, new byte[]{Command,StartLiveData});
+		readCommandResponse(StartLiveData);				
 	}
 
 
 	@Override
 	public void stopLiveData() throws IOException {
-		// TODO Auto-generated method stub
+		dev.writeFrame(api_data, new byte[]{Command,StopLiveData});
+		readCommandResponse(StopLiveData);	
 		
 	}
 
 
 	@Override
 	public String getVersion() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		dev.writeFrame(api_data, new byte[]{Command,GetVersion});
+		byte[] resp = readCommandResponse(GetVersion);		
+		return new String(resp);
 	}
 
 
 	@Override
-	public int[] readData() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public byte[] readData() throws IOException {		
+		return dev.readFrame();
 	}
 
 
 	@Override
 	public void breakSocket() throws IOException {
-		// TODO Auto-generated method stub
-		
+		dev.writeFrame(api_ack, new byte[]{ack_break});		
 	}
 
 
 	@Override
 	public void stopMode() throws IOException {
-		// TODO Auto-generated method stub
-		
+		dev.writeFrame(api_data, new byte[]{Command,ModeStop});
+		readCommandResponse(ModeStop);		
 	}
 
 
 	@Override
 	public long startBulkData(int dataMode) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		if (dataMode==DM_FULL){
+			dev.writeFrame(api_data, new byte[]{Command,StartBulkData});
+			byte[] resp = readCommandResponse(StartBulkData);
+			return ByteArray.fromByteUInt32(resp);			
+		} else if (dataMode == DM_NEW){
+			dev.writeFrame(api_data, new byte[]{Command,BufferCommand,BC_GET_READ_POS});
+			byte[] resp = readCommandResponse(BufferCommand);						
+			ByteBuffer bf = ByteBuffer.allocate(6);
+			bf.put(Command);
+			bf.put(StartBulkData);
+			bf.put(resp);			
+			dev.writeFrame(api_data,bf.array());								
+			byte[] db = readCommandResponse(StartBulkData);
+			return  ByteArray.fromByteUInt32(db);
+		} else {
+			throw new IOException("Mode not supported."); 	
+		}
 	}
 
 
 	@Override
-	public int[] readBulk() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public byte[] readBulk() throws IOException {
+		return dev.readFrame();
 	}
 
 
 	@Override
 	public void sendBufferCommand(int command) throws IOException {
-		// TODO Auto-generated method stub
+		dev.writeFrame(api_data, new byte[]{BufferCommand,(byte)command});		
+		readCommandResponse(BufferCommand);
 		
 	}
 	
+	private byte[] readCommandResponse(byte command) throws IOException {		
+		byte[] resp = dev.readFrame();
+		if (resp.length < 2){
+			throw new IOException("Invalid command response (too short).");			
+		} else {
+			if (resp[0] != Response || resp[1] != command){
+				throw new IOException("Invalid command response (invalid command).");
+			} else {
+				return Arrays.copyOfRange(resp, 2, resp.length);	
+			}			
+		}
+	}
+	
+	
+		
+	
+	
 }
+
