@@ -15,31 +15,26 @@ public class FrameParser {
 
 	private FrameHandler handler;
 			
-	public FrameParser() {
-		
-	}
 	
 	public FrameParser(FrameHandler handler) {
 		this.handler = handler;
 	}
 	
+	
 			
-	public void parse(byte[] payload) throws FrameParserException {
-		
+	public void parse(byte[] payload) throws FrameParserException {		
 		try {
 			if (payload == null || payload.length < 3) return;
-			ByteBuffer bf = ByteBuffer.wrap(payload);
-			bf.order(ByteOrder.LITTLE_ENDIAN);
+			ByteBuffer bf = ByteBuffer.wrap(payload);			
 			parse(bf);			
-
-		} catch (BufferUnderflowException|BufferOverflowException e) {
-			
+		} catch (BufferUnderflowException|BufferOverflowException e) {			
 			throw new FrameParserException(0,"Data:" + ByteArray.toString(payload));
 		}
 	}
-
-	private void parse(ByteBuffer bf) throws FrameParserException {
-
+	
+	
+	public void parse(ByteBuffer bf) throws FrameParserException {
+		bf.order(ByteOrder.LITTLE_ENDIAN);
 		while (bf.remaining() > 1) {
 			byte frameType = bf.get();
 			switch (frameType) {
