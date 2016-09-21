@@ -16,15 +16,15 @@ public abstract class DefaultFrameHandler implements FrameHandler, FrameEventHan
 	private String defaultOrigin;
 
 	public DefaultFrameHandler() {
-		initFrame();
+		startOfFrame();
 	}
 
 	public DefaultFrameHandler(String defaultOrigin) {
 		this.defaultOrigin = defaultOrigin;
-		initFrame();
+		startOfFrame();
 	}
 
-	private void initFrame() {
+	public void startOfFrame() {
 		this.origin = this.defaultOrigin;
 		this.timestamp = new Date().getTime();
 		this.rssi = null;
@@ -48,7 +48,7 @@ public abstract class DefaultFrameHandler implements FrameHandler, FrameEventHan
 	
 	@Override
 	public void endOfFrame() {
-		initFrame();		
+		startOfFrame();		
 	}
 
 
@@ -64,10 +64,23 @@ public abstract class DefaultFrameHandler implements FrameHandler, FrameEventHan
 
 	@Override
 	public void onRoute(int myId, int panId) {
-		StringBuilder b = new StringBuilder();
-		b.append(origin).append("/XBee").append(panId).append(":").append(myId);
-		origin = b.toString();
+		StringBuffer b = new StringBuffer(origin);
+		b.append("/XBee").append(panId).append(":").append(myId);
+		this.origin = b.toString();
 	};
+	
+	@Override
+	public void onRoute(String origin) {
+		StringBuffer b = new StringBuffer(this.origin);
+		b.append("/").append(origin);
+		this.origin = b.toString();						
+	};
+	
+	@Override
+	public void onBinary(long pos, byte[] value){
+		binary(pos, value);
+	}
+	
 
 	@Override
 	public void onRouteRssi(int myId, int panId, int rssi) {
@@ -126,7 +139,7 @@ public abstract class DefaultFrameHandler implements FrameHandler, FrameEventHan
 		}
 						
 		dataFrame(origin, getTimeStamp(), values, getRssi());
-		initFrame();		
+		startOfFrame();		
 	}
 
 	
@@ -161,6 +174,11 @@ public abstract class DefaultFrameHandler implements FrameHandler, FrameEventHan
 	@Override
 	public void error(String origin, Date timeStamp, String message) {
 
+	}
+	
+	@Override
+	public void binary(long pos, byte[] value){
+		
 	}
 
 }

@@ -134,6 +134,32 @@ public class ByteArray {
 		return bb.getShort();
 	}
 	
+	// UInt16
+	public static byte[] toByteUInt16(int value){
+		if (value > 65535) throw new IllegalArgumentException();		
+		byte[] b = new byte[2];	
+		if (order == ByteOrder.LITTLE_ENDIAN) {
+			b[1] = (byte) ((value >> 8) & 0xff);
+			b[0] = (byte) (value & 0xff);	
+		} else {
+			b[0] = (byte) ((value >> 8) & 0xff);
+			b[1] = (byte) (value & 0xff);
+		}			
+		return b;
+	}
+	
+	
+	
+	public static int fromByteUInt16(ByteBuffer bb){		 
+		return (int) (bb.getShort() & 0xffff); 
+	}
+	
+	public static int fromByteUInt16(byte[] value){
+		ByteBuffer bb = ByteBuffer.wrap(value);
+		bb.order(order);
+		return fromByteUInt16(bb);
+	}
+	
 	// UInt8
 	public static byte toByteUInt8(int value){
 		return (byte)value;
@@ -142,6 +168,10 @@ public class ByteArray {
 	public static int fromByteUInt8(byte value){
 		return 0xff & value;
 	}
+	
+	
+	
+		
 
 	
 	public static String toString(byte b){

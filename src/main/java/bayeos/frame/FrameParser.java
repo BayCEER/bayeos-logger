@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Hashtable;
 
 import bayeos.binary.ByteArray;
+import bayeos.binary.CheckSum;
 import bayeos.frame.DateAdapter;
 
 
@@ -28,16 +29,32 @@ public class FrameParser {
 			ByteBuffer bf = ByteBuffer.wrap(payload);			
 			parse(bf);			
 		} catch (BufferUnderflowException|BufferOverflowException e) {			
-			throw new FrameParserException(0,"Data:" + ByteArray.toString(payload));
+			throw new FrameParserException(1,"Data:" + ByteArray.toString(payload));
 		}
 	}
 	
 	
-	public void parse(ByteBuffer bf) throws FrameParserException {
+	public void parse(ByteBuffer bf) throws FrameParserException {		
+		handler.startOfFrame();
 		bf.order(ByteOrder.LITTLE_ENDIAN);
 		while (bf.remaining() > 1) {
 			byte frameType = bf.get();
 			switch (frameType) {
+			
+			case (FrameConstants.ChecksumFrame):				
+				CheckSum chk = new CheckSum();
+				chk.addByte(frameType); 				
+				byte[] payload = new byte[bf.remaining() - 2];				
+				bf.get(payload);				
+				chk.addBytes(payload);												
+				int expectedSum = ByteArray.fromByteUInt16(bf);
+				int calcSum = chk.twoByte();				
+				if (expectedSum != calcSum){
+					throw new FrameParserException(2, "Checksum expected:" + expectedSum + " was:" + calcSum);
+				} else {
+					parse(ByteBuffer.wrap(payload));
+				};
+				break;
 			case (FrameConstants.DataFrame):
 				parseDataFrame(bf);
 				break;
@@ -57,6 +74,12 @@ public class FrameParser {
 				Short myId = bf.getShort();
 				Short panId = bf.getShort();
 				handler.onRoute(myId, panId);
+				break;
+			case FrameConstants.RoutedOriginFrame:
+				int n = bf.get() & 0xff;
+				byte[] b = new byte[n];
+				bf.get(b);
+				handler.onRoute(new String(b));
 				break;
 			case FrameConstants.RoutedFrameRSSI:
 				myId = bf.getShort();
@@ -85,9 +108,12 @@ public class FrameParser {
 				}
 				handler.onOriginFrame(o);
 				break;
-
+			case FrameConstants.BinaryFrame:				
+				d = ByteArray.fromByteUInt32(bf);
+				handler.onBinary(d,getRemaining(bf));								
+				break;
 			default:
-				// log.warn("Unknown frame type:" + frameType);
+				throw new FrameParserException(3, "Unknown frame type:" + frameType);
 			}
 		}
 		handler.endOfFrame();
@@ -99,7 +125,7 @@ public class FrameParser {
 		
 		int bm = frameType & FrameConstants.ByteMask;				
 		if (!(bm == FrameConstants.Float32le || bm == FrameConstants.Int32le || bm == FrameConstants.Int16le || bm == FrameConstants.UInt8)){			
-			throw new FrameParserException(1, "Unknown value type:" + bm);
+			throw new FrameParserException(4, "Unknown value type:" + bm);
 		}
 		
 		int fm = frameType & FrameConstants.FrameMask;
@@ -107,7 +133,7 @@ public class FrameParser {
 			fm != FrameConstants.FrameWithoutOffset && 
 			fm != FrameConstants.FrameWithChannel &&
 			fm != FrameConstants.FrameWithLabel) {
-			throw new FrameParserException(2, "Unknown data frame type:" + fm);
+			throw new FrameParserException(5, "Unknown data frame type:" + fm);
 		}
 								
 		String channel = null;

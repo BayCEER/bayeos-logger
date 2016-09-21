@@ -41,7 +41,7 @@ public class SerialFrameParser {
 				int api = readByteEscaped(in);
 												
 				CheckSum chkCalculated = new CheckSum();
-				chkCalculated.addByte(api);
+				chkCalculated.addByte((byte) api);
 									
 				// Read payload 
 				byte[] payload = new byte[length];				
@@ -49,13 +49,13 @@ public class SerialFrameParser {
 				for (int i=0;i<length;i++){
 					p = readByteEscaped(in);
 					payload[i] = (byte) p; 
-					chkCalculated.addByte(p);
+					chkCalculated.addByte((byte) p);
 				}
 				
 				// Read checksum 
 				int chkExpected = readByteEscaped(in);					
-				if (chkCalculated.get() != chkExpected){
-					handler.onError("Invalid checksum. Expected:" + chkExpected + " Calculated:" + chkCalculated.get());
+				if (chkCalculated.oneByte() != chkExpected){
+					handler.onError("Invalid checksum. Expected:" + chkExpected + " Calculated:" + chkCalculated.oneByte());
 					continue;
 				} 
 				

@@ -14,8 +14,13 @@ public class FrameConstants {
 	public static final byte DelayedFrame = 0x7; /* [0x7][(unsigned long) delay][Original Frame] */
 	public static final byte RoutedFrameRSSI = 0x8; /* [0x8][MY_ID][PANID][RSSI][Original Frame] */
 	public static final byte TimestampFrame = 0x9; /* [0x9][(unsigned long) timestamp (sec since 2000-01-01 00:00 GMT)][Original Frame] */
+	
+	public static final byte BinaryFrame = 0xa; /* [0xa][(unsigned long) pos][binary data] */
 	public static final byte OriginFrame = 0xb; /* [origin_length][ORIGIN][Original Frame] */
 	public static final byte MillisecondTimestampFrame = 0xc; // [(long) timestamp (milli secs since 1970-01-01 00:00 GMT)][Original Frame]
+	public static final byte RoutedOriginFrame = 0xd; /* [0xd][origin_length][ORIGIN][Original Frame] -> Origin is appended to current origin using "/" */
+	/* public static final byte GatewayCommand = 0xe; */
+	public static final byte ChecksumFrame = 0xf; /* [0xf][Original Frame][checksum_16bit] */
 
 	/* Data Frames with offset */
 	public static final byte Float32le = 0x1; // Float 4 Byte	
@@ -58,15 +63,17 @@ public class FrameConstants {
 		case DataFrame: return "DataFrame";	
 		case Command: return "Command";	
 		case Response: return "Response";	
-		case Error: return "Error";	
-		
+		case Error: return "Error";			
 		case RoutedFrame: return "RoutedFrame";
 		case DelayedFrame: return "DelayedFrame";
 		case RoutedFrameRSSI: return "RoutedFrameRSSI";
+		case BinaryFrame: return "BinarayFrame";
 		case TimestampFrame: return "TimestampFrame";
 		case OriginFrame: return "OriginFrame";
 		case MillisecondTimestampFrame: return "MillisecondTimestampFrame";
-				
+		case RoutedOriginFrame: return "RoutedOriginFrame";
+		case ChecksumFrame: return "ChecksumFrame";
+		
 		default:
 			return "Unknown";
 		}

@@ -11,5 +11,6 @@ public interface FrameEventHandler {
 	void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi);
 	void message(String origin, Date timeStamp, String message);
 	void error(String origin, Date timeStamp, String message);
+	void binary(long pos, byte[] value);
 
 }

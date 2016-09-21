@@ -24,6 +24,11 @@ public class OriginFrame implements ByteFrame {
 		return origin;
 	}
 	
+	public byte[] getPayload() {
+		return payload;
+	}
+
+	
 	public byte[] getBytes() {
 		byte[] n = new byte[1 + 1 + origin.length() + payload.length];
 		ByteBuffer bf = ByteBuffer.wrap(n);
@@ -34,5 +39,7 @@ public class OriginFrame implements ByteFrame {
 		bf.put(payload);
 		return n;
 	}
+
+	
 
 }

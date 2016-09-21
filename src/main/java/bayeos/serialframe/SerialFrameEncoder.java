@@ -23,7 +23,7 @@ public class SerialFrameEncoder {
 			writeEscaped(bout, i);
 			s.addByte(i);
 		}		
-		writeEscaped(bout,(byte) s.get());		
+		writeEscaped(bout,(byte) s.oneByte());		
 		return bout.toByteArray();		
 	}
 	
