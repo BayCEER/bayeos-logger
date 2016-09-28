@@ -4,17 +4,17 @@ public class CheckSum {
 	int sum = 0;
 	
 	public int oneByte(){				
-		return 0xff - (0xff & sum);
+		return 0xff - (sum & 0xff);
 	}
 	
 	public int twoByte(){		
-		return 0xffff - (0xffff & sum );		
+		return 0xffff - (sum & 0xffff);		
 		 		
 	}						
 	
 	
 	public void addByte(byte b){
-	  sum+=b;
+	  sum+=(b & 0xff);
 	}
 	
 	public void addBytes(byte[] values){

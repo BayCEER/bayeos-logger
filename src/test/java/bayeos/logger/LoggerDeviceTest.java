@@ -5,10 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Hashtable;
@@ -16,6 +12,7 @@ import java.util.Map.Entry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -28,7 +25,7 @@ import bayeos.serial.ComPortDevice;
 import bayeos.serialframe.SerialFrameDevice;
 
 
-
+@Ignore
 public class LoggerDeviceTest {
 
 	public final String comPort = "COM10";

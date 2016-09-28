@@ -8,30 +8,29 @@ import java.util.Map;
 
 public abstract class DefaultFrameHandler implements FrameHandler, FrameEventHandler {
 
-	private String origin;
+	private String defaultOrigin;
+	private StringBuffer origin;		
 	private Long timestamp;
 	private Integer rssi;
 	private Map<String, List<String>> originMap = new Hashtable<>();
-
-	private String defaultOrigin;
-
-	public DefaultFrameHandler() {
-		startOfFrame();
+	
+	
+	public DefaultFrameHandler() {			
+		this("");
 	}
 
 	public DefaultFrameHandler(String defaultOrigin) {
-		this.defaultOrigin = defaultOrigin;
-		startOfFrame();
+		this.defaultOrigin = defaultOrigin;		
 	}
 
 	public void startOfFrame() {
-		this.origin = this.defaultOrigin;
+		this.origin = new StringBuffer(defaultOrigin);
 		this.timestamp = new Date().getTime();
 		this.rssi = null;
 	}
 
-	public String getOrigin() {
-		return origin;
+	public String getOrigin() {		
+		return origin.toString();							
 	}
 
 	public Date getTimeStamp() {
@@ -46,34 +45,25 @@ public abstract class DefaultFrameHandler implements FrameHandler, FrameEventHan
 		return rssi;
 	}
 	
-	@Override
-	public void endOfFrame() {
-		startOfFrame();		
-	}
-
-
+	
 	@Override
 	public void onDelay(long millis) {
 		timestamp = timestamp - millis;
 	}
 
 	@Override
-	public void onOriginFrame(String origin) {
-		this.origin = origin;
+	public void onOriginFrame(String origin) {		
+		this.origin = new StringBuffer(origin);
 	}
 
 	@Override
 	public void onRoute(int myId, int panId) {
-		StringBuffer b = new StringBuffer(origin);
-		b.append("/XBee").append(panId).append(":").append(myId);
-		this.origin = b.toString();
+		this.origin.append("/XBee").append(panId).append(":").append(myId);		
 	};
 	
 	@Override
 	public void onRoute(String origin) {
-		StringBuffer b = new StringBuffer(this.origin);
-		b.append("/").append(origin);
-		this.origin = b.toString();						
+		this.origin.append("/").append(origin);			
 	};
 	
 	@Override
@@ -138,8 +128,7 @@ public abstract class DefaultFrameHandler implements FrameHandler, FrameEventHan
 			newChannels(origin,newKeys);
 		}
 						
-		dataFrame(origin, getTimeStamp(), values, getRssi());
-		startOfFrame();		
+		dataFrame(origin, getTimeStamp(), values, getRssi());				
 	}
 
 	

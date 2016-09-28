@@ -15,14 +15,11 @@ import bayeos.frame.DateAdapter;
 public class FrameParser {
 
 	private FrameHandler handler;
-			
-	
+		
 	public FrameParser(FrameHandler handler) {
 		this.handler = handler;
 	}
-	
-	
-			
+				
 	public void parse(byte[] payload) throws FrameParserException {		
 		try {
 			if (payload == null || payload.length < 3) return;
@@ -33,14 +30,19 @@ public class FrameParser {
 		}
 	}
 	
+	public void parse(ByteBuffer bf) throws FrameParserException {
+		parse(bf,true);
+	}
 	
-	public void parse(ByteBuffer bf) throws FrameParserException {		
-		handler.startOfFrame();
+	
+	private void parse(ByteBuffer bf, boolean startNewFrame) throws FrameParserException {
+		
+		if (startNewFrame) handler.startOfFrame();
 		bf.order(ByteOrder.LITTLE_ENDIAN);
 		while (bf.remaining() > 1) {
 			byte frameType = bf.get();
-			switch (frameType) {
 			
+			switch (frameType) {			
 			case (FrameConstants.ChecksumFrame):				
 				CheckSum chk = new CheckSum();
 				chk.addByte(frameType); 				
@@ -52,7 +54,7 @@ public class FrameParser {
 				if (expectedSum != calcSum){
 					throw new FrameParserException(2, "Checksum expected:" + expectedSum + " was:" + calcSum);
 				} else {
-					parse(ByteBuffer.wrap(payload));
+					parse(ByteBuffer.wrap(payload),false);
 				};
 				break;
 			case (FrameConstants.DataFrame):
@@ -79,7 +81,8 @@ public class FrameParser {
 				int n = bf.get() & 0xff;
 				byte[] b = new byte[n];
 				bf.get(b);
-				handler.onRoute(new String(b));
+				String ro = new String(b);				
+				handler.onRoute(ro);
 				break;
 			case FrameConstants.RoutedFrameRSSI:
 				myId = bf.getShort();
@@ -116,7 +119,6 @@ public class FrameParser {
 				throw new FrameParserException(3, "Unknown frame type:" + frameType);
 			}
 		}
-		handler.endOfFrame();
 	}
 
 	private void parseDataFrame(ByteBuffer bf) throws FrameParserException {

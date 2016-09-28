@@ -18,7 +18,6 @@ public interface FrameHandler {
 	void onMillisecond(Date time);									// 0xc
 	void onRoute(String origin);									// 0xd
  
-	void endOfFrame();
 	void startOfFrame();	
 	
 }

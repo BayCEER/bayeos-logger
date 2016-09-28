@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.Hashtable;
 
+import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Test;
 
@@ -304,13 +305,86 @@ public class FrameParserTest {
 			fail("Exception not thrown.");
 		} catch (FrameParserException e) {
 			System.out.println(e.getMessage());
-		}
-		
-		
-		
-		
+		}		
 		
 	}
+	
+	
+	@Test 
+	public void testCheckSumDataFrame() throws FrameParserException{		 
+		FrameParser p = new FrameParser(new DefaultFrameHandler() {
+			@Override
+			public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
+				assertEquals("", origin);
+				assertEquals(2F,values.get("1"),0.01);
+				assertEquals(5F,values.get("2"),0.01);
+				assertEquals(4F,values.get("3"),0.01);
+			}
+		});		
+		p.parse(new byte[]{0xf, 0x1, 0x22, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0, (byte) 0xc2, (byte) 0xff});
+	}
+	
+	@Test 
+	public void testRoutedRouted() throws FrameParserException{		 
+		FrameParser p = new FrameParser(new DefaultFrameHandler() {
+			@Override
+			public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
+				assertEquals("/XBee3331:11/XBee3332:12", origin);
+				assertEquals(2F,values.get("1"),0.01);
+				assertEquals(5F,values.get("2"),0.01);
+				assertEquals(4F,values.get("3"),0.01);
+				assertEquals(-64,rssi.intValue());
+			}
+		});	
+		
+		p.parse(new byte[]{0xf, 0x6, 0xb, 0x0, 0x3, 0xd, 0x8, 0xc, 0x0, 0x4, 0xd, 0x40, 0x1, 0x22, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0, 0x3c, (byte) 0xff});
+	}
+
+	
+	@Test 
+	public void testRoutedOriginRoutedXBee() throws FrameParserException{		 
+		FrameParser p = new FrameParser(new DefaultFrameHandler() {
+			@Override
+			public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
+				assertEquals("/RoutedOrigin/XBee3331:11/XBee3332:12", origin);
+				assertEquals(2F,values.get("1"),0.01);
+				assertEquals(5F,values.get("2"),0.01);
+				assertEquals(4F,values.get("3"),0.01);
+				assertEquals(-64,rssi.intValue());
+			}
+		});			
+		p.parse(new byte[]{0xd, 0xc, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x64, 0x4f, 0x72, 0x69, 0x67, 0x69, 0x6e, 0xf, 0x6, 0xb, 0x0, 0x3, 0xd, 0x8, 0xc, 0x0, 0x4, 0xd, 0x40, 0x1, 0x22, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0, 0x3c, (byte) 0xff});
+	}
+	 
+	
+	@Test 
+	public void testXBeeRoutedXBee() throws FrameParserException{		 
+		FrameParser p = new FrameParser(new DefaultFrameHandler() {
+			@Override
+			public void dataFrame(String origin, Date timeStamp, Hashtable<String, Float> values, Integer rssi) {
+				assertEquals("/XBee3332:12/RoutedOrigin/XBee3331:11/XBee3332:12", origin);
+				assertEquals(2F,values.get("1"),0.01);
+				assertEquals(5F,values.get("2"),0.01);
+				assertEquals(4F,values.get("3"),0.01);
+				assertEquals(-64,rssi.intValue());
+			}
+		});			
+		p.parse(new byte[]{0x8, 0xc, 0x0, 0x4, 0xd, 0x40, 0xd, 0xc, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x64, 0x4f, 0x72, 0x69, 0x67, 0x69, 0x6e, 0xf, 0x6, 0xb, 0x0, 0x3, 0xd, 0x8, 0xc, 0x0, 0x4, 0xd, 0x40, 0x1, 0x22, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0, 0x3c, (byte) 0xff});
+	}
+	
+	
+	@Test 
+	public void newOrigin() throws FrameParserException {
+		FrameParser p = new FrameParser(new DefaultFrameHandler() {
+			@Override
+			public void newOrigin(String origin) {
+				assertEquals("/XBee3332:12/RoutedOrigin/XBee3331:11/XBee3332:12", origin);
+			}
+		});						
+		p.parse(new byte[]{0x8, 0xc, 0x0, 0x4, 0xd, 0x40, 0xd, 0xc, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x64, 0x4f, 0x72, 0x69, 0x67, 0x69, 0x6e, 0xf, 0x6, 0xb, 0x0, 0x3, 0xd, 0x8, 0xc, 0x0, 0x4, 0xd, 0x40, 0x1, 0x22, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0, 0x3c, (byte) 0xff});		
+	}
+	
+	
 	
 
 }

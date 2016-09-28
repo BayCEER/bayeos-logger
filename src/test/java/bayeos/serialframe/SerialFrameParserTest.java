@@ -2,10 +2,11 @@ package bayeos.serialframe;
 
 import java.io.InputStream;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 
-
+@Ignore
 public class SerialFrameParserTest {
 	
 	

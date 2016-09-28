@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import bayeos.device.SerialDeviceInterface;
@@ -13,6 +14,7 @@ import bayeos.serial.ComPortDevice;
 import static bayeos.serialframe.SerialFrameConstants.*;
 import static org.junit.Assert.*;
 
+@Ignore
 public class SeriaDeviceTest {
 	
 		
