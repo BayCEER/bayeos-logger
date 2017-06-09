@@ -1,4 +1,4 @@
-package bayeos.device;
+package bayeos.serialdevice;
 
 import java.io.IOException;
 
@@ -10,7 +10,7 @@ import java.io.IOException;
  * 
  */
 
-public interface SerialDeviceInterface {
+public interface ISerialDevice {
 		
 	
 	/**
@@ -32,16 +32,5 @@ public interface SerialDeviceInterface {
 	
 	
 	
-	/** 
-	 * Opens connection and initialize device 
-	 * @return true on success
-	 */
-	public boolean open();
-	
-	
-	/**
-	 * Close connection to device
-	 */
-	public void close();
 
 }

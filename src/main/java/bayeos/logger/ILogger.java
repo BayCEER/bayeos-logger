@@ -49,7 +49,7 @@ public interface ILogger {
 	public void sendBufferCommand(int command) throws IOException;
 	
     
-	public void close();
+	
 	
 	
 	

@@ -8,7 +8,7 @@ import bayeos.frame.DateAdapter;
 import bayeos.frame.FrameConstants;
 
 
-public class LoggerFileReader {
+public class BulkReader {
 	
 	
 	InputStream in;
@@ -18,7 +18,7 @@ public class LoggerFileReader {
 	
 	long bytesRead = 0 ;
 
-	public LoggerFileReader(InputStream in) {
+	public BulkReader(InputStream in) {
 		this.in = in;		
 	}
 

@@ -52,20 +52,20 @@ public class LoggerConstants {
 	
 	
 	// BufferCommands
-		public static final int BC_SAVE_READ_TO_EPROM = 0;
-		public static final int BC_ERASE = 1;
-		public static final int BC_SET_READ_TO_LAST_EPROM_POS = 2;
-		public static final int BC_SET_READ_TO_WRITE_POINTER = 3;
-		public static final int BC_SET_READ_TO_LAST_OF_BINARY_END_POS = 4;
-		public static final int BC_GET_READ_POS = 5;
+	public static final int BC_SAVE_READ_TO_EPROM = 0;
+	public static final int BC_ERASE = 1;
+	public static final int BC_SET_READ_TO_LAST_EPROM_POS = 2;
+	public static final int BC_SET_READ_TO_WRITE_POINTER = 3;
+	public static final int BC_SET_READ_TO_LAST_OF_BINARY_END_POS = 4;
+	public static final int BC_GET_READ_POS = 5;
 			
-		// DataMode 
-		public static final int DM_NEW = 0;
-		public static final int DM_FULL = 1;
+	// DataMode 
+	public static final int DM_NEW = 0;
+	public static final int DM_FULL = 1;
 		
-		// StopMode 
-		public static final int SM_STOP = 0;
-		public static final int SM_RESET = 1;
-		public static final int SM_CANCEL = 2;
+	// StopMode 
+	public static final int SM_STOP = 0;
+	public static final int SM_RESET = 1;
+	public static final int SM_CANCEL = 2;
 	
 }

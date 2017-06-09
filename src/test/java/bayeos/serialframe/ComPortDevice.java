@@ -1,4 +1,4 @@
-package bayeos.serial;
+package bayeos.serialframe;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import bayeos.device.SerialDeviceInterface;
+import bayeos.serialdevice.ISerialDevice;
 
-public class ComPortDevice implements SerialDeviceInterface {
+public class ComPortDevice implements ISerialDevice {
 	
 	private String port;
 	private int baudrate;		 
@@ -41,8 +41,12 @@ public class ComPortDevice implements SerialDeviceInterface {
 		CommPortIdentifier ident;
 		try {
 			ident = CommPortIdentifier.getPortIdentifier(port);
-			comm = ident.open("SerialPort", 10);		
+			
+			comm = ident.open("SerialPort", 2000);
+			comm.enableReceiveTimeout(10000);
 			comm.setSerialPortParams(baudrate, SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+			comm.notifyOnDataAvailable(true);
+		
 			in = comm.getInputStream();
 			out = comm.getOutputStream();
 		} catch (NoSuchPortException|PortInUseException|UnsupportedCommOperationException e) {			
@@ -72,7 +76,7 @@ public class ComPortDevice implements SerialDeviceInterface {
 	}
 
 	public int read() throws IOException {		
-		return in.read();
+		return in.read();		
 	}
 
 	
