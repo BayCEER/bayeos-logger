@@ -18,8 +18,8 @@ public interface ILogger {
 
 	public Date getDateOfNextFrame() throws IOException;
 
-	public long startData(int dataMode) throws IOException;	
-	public void stopData(int stopMode) throws IOException;
+	public long startData(byte dataMode) throws IOException;	
+	public void stopData(byte stopMode) throws IOException;
 		
 	public void startLiveData() throws IOException;
 	
@@ -38,7 +38,7 @@ public interface ILogger {
 	/* 
 	 * @version 1.1
 	 */
-	public long startBulkData(int dataMode) throws IOException;
+	public long startBulkData(byte dataMode) throws IOException;
 	/*
 	 * @version 1.1
 	 */
@@ -46,7 +46,7 @@ public interface ILogger {
 	/*
 	 * @version 1.1
 	 */
-	public void sendBufferCommand(int command) throws IOException;
+	public void sendBufferCommand(byte command) throws IOException;
 	
     
 	

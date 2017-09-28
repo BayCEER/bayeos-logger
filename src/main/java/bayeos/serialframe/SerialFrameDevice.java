@@ -1,6 +1,12 @@
 package bayeos.serialframe;
 
-import static bayeos.serialframe.SerialFrameConstants.*;
+import static bayeos.serialframe.SerialFrameConstants.ACK_FRAME;
+import static bayeos.serialframe.SerialFrameConstants.BREAK_FRAME;
+import static bayeos.serialframe.SerialFrameConstants.NACK_FRAME;
+import static bayeos.serialframe.SerialFrameConstants.api_ack;
+import static bayeos.serialframe.SerialFrameConstants.api_data;
+import static bayeos.serialframe.SerialFrameConstants.escapeByte;
+import static bayeos.serialframe.SerialFrameConstants.frameDelimeter;
 
 import java.io.IOException;
 
@@ -12,8 +18,9 @@ import bayeos.serialdevice.ISerialDevice;
 public class SerialFrameDevice implements ISerialFrame {
 	
 	
-	public static boolean DEBUG = false;
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SerialFrameDevice.class);
 
+		
 	private ISerialDevice device;	
 		
 
@@ -50,11 +57,11 @@ public class SerialFrameDevice implements ISerialFrame {
 			
 			
 	private byte[] readFrame(byte apiType) throws IOException {				
-		if (DEBUG) System.out.println("Waiting on start byte ...");
+		log.debug("Waiting on start byte ...");
 		while (true){
 			int b = device.read();			
 			if (b == frameDelimeter) {
-				if (DEBUG) System.out.println("Start byte received.");
+				log.debug("Start byte received.");
 				break; 
 			}			
 		}
@@ -70,7 +77,7 @@ public class SerialFrameDevice implements ISerialFrame {
 		
 		// Skip invalid response types 		
 		if (apiType!=api){
-			if (DEBUG) System.out.println("Skipping invalid response.");
+			log.debug("Skipping invalid response.");
 			return readFrame(apiType);
 		}
 		
@@ -94,7 +101,7 @@ public class SerialFrameDevice implements ISerialFrame {
 			throw new IOException("Invalid checksum. Expected:" + chkExpected + " Calculated:" + chkCalculated.oneByte());			
 		} 	
 
-		if (DEBUG) System.out.println("Writing ack ...");		
+		log.debug("Writing ack ...");		
 		device.write(ACK_FRAME);
 		return payload;		 
 	}

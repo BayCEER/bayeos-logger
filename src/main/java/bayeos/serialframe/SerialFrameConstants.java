@@ -2,7 +2,7 @@ package bayeos.serialframe;
 
 
 
-public class SerialFrameConstants {
+public final class SerialFrameConstants {
 	
 	public static final byte frameDelimeter = 0x7e;
 	public static final byte api_data = 0x1;
@@ -17,6 +17,8 @@ public class SerialFrameConstants {
 	public static final byte[] NACK_FRAME = {frameDelimeter, 0x1, api_ack, ack_nok, (byte) 0xFB };
 	public static final byte[] BREAK_FRAME = { frameDelimeter, 0x1, api_ack, ack_break, (byte) 0xFA };
 
-	
+	private SerialFrameConstants(){
+		
+	}
 	
 }

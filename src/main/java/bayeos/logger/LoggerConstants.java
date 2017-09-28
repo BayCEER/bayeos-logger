@@ -1,6 +1,6 @@
 package bayeos.logger;
 
-public class LoggerConstants {
+public final class LoggerConstants {
 	
 	public static final byte SetChannelAddress =  0x1;
 	public static final byte GetChannelAddress = 0x2;
@@ -27,8 +27,7 @@ public class LoggerConstants {
 	 2 = reset read pointer 
 	 3 = set read pointer to write pointer,	   
 	*/
-	public static final byte StopLiveData = 0xc;
-	
+	public static final byte StopLiveData = 0xc;	
 	public static final byte ModeStop = 0x12;
 	public static final byte Seek = 0x13;
 	
@@ -52,20 +51,24 @@ public class LoggerConstants {
 	
 	
 	// BufferCommands
-	public static final int BC_SAVE_READ_TO_EPROM = 0;
-	public static final int BC_ERASE = 1;
-	public static final int BC_SET_READ_TO_LAST_EPROM_POS = 2;
-	public static final int BC_SET_READ_TO_WRITE_POINTER = 3;
-	public static final int BC_SET_READ_TO_LAST_OF_BINARY_END_POS = 4;
-	public static final int BC_GET_READ_POS = 5;
+	public static final byte BC_SAVE_READ_TO_EPROM = 0x0;
+	public static final byte BC_ERASE = 0x1;
+	public static final byte BC_SET_READ_TO_LAST_EPROM_POS = 0x2;
+	public static final byte BC_SET_READ_TO_WRITE_POINTER = 0x3;
+	public static final byte BC_SET_READ_TO_LAST_OF_BINARY_END_POS = 0x4;
+	public static final byte BC_GET_READ_POS = 0x5;
 			
 	// DataMode 
-	public static final int DM_NEW = 0;
-	public static final int DM_FULL = 1;
+	public static final byte DM_NEW = 0x0;
+	public static final byte DM_FULL = 0x1;
 		
 	// StopMode 
-	public static final int SM_STOP = 0;
-	public static final int SM_RESET = 1;
-	public static final int SM_CANCEL = 2;
+	public static final byte SM_STOP = 0x0;
+	public static final byte SM_RESET = 0x1;
+	public static final byte SM_CANCEL = 0x2;
 	
+	
+	private LoggerConstants(){
+		
+	}
 }

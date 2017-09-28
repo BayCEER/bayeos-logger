@@ -22,6 +22,8 @@ import static bayeos.logger.LoggerConstants.StopData;
 import static bayeos.logger.LoggerConstants.StopLiveData;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
@@ -29,6 +31,7 @@ import java.util.Date;
 import bayeos.binary.ByteArray;
 import bayeos.frame.DateAdapter;
 import bayeos.serialdevice.ISerialDevice;
+import bayeos.serialdevice.SerialDevice;
 import bayeos.serialframe.SerialFrameDevice;
 
 public class Logger implements ILogger {
@@ -37,21 +40,30 @@ public class Logger implements ILogger {
 			
 	private SerialFrameDevice dev;
 	
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Logger.class);
+	
 	public Logger(ISerialDevice serial){
 		dev = new SerialFrameDevice(serial);
 	}
 	
 	
+	public Logger(InputStream in, OutputStream out){
+		this(new SerialDevice(in, out));
+	}
+	
+	
 		
 	@Override
-	public String getName() throws IOException {		
+	public String getName() throws IOException {	
+		log.debug("Getting name of device");	
 		dev.writeFrame(new byte[]{Command,GetName});
 		byte[] resp = readCommandResponse(GetName);		
 		return new String(resp);		
 	}
 	
 	@Override
-	public void setName(String name) throws IOException {		
+	public void setName(String name) throws IOException {	
+		log.debug("Setting name of device");
 		ByteBuffer bf = ByteBuffer.allocate(name.length()+2);
 		bf.put(Command);
 		bf.put(SetName);
@@ -63,6 +75,7 @@ public class Logger implements ILogger {
 
 	@Override
 	public Date getTime() throws IOException {
+		log.debug("Getting time of device");
 		dev.writeFrame(new byte[]{Command,GetTime});
 		byte[] resp = readCommandResponse(GetTime);
 		return DateAdapter.getDate(ByteArray.fromByteUInt32(resp));		
@@ -71,6 +84,7 @@ public class Logger implements ILogger {
 
 	@Override
 	public Date setTime(Date date) throws IOException {
+		log.debug("Setting time of device to " + date);
 		long secs = DateAdapter.getSeconds(date);		
 		ByteBuffer bf = ByteBuffer.allocate(6);
 		bf.put(Command);
@@ -84,6 +98,7 @@ public class Logger implements ILogger {
 
 	@Override
 	public int getSamplingInterval() throws IOException {
+		log.debug("Getting sampling interval");
 		dev.writeFrame(new byte[]{Command,GetSamplingInt});
 		byte[] resp = readCommandResponse(GetSamplingInt);
 		return ByteArray.fromByteInt16(resp);
@@ -93,6 +108,7 @@ public class Logger implements ILogger {
 
 	@Override
 	public void setSamplingInterval(int interval) throws IOException {
+		log.debug("Set sampling interval");
 		ByteBuffer bf = ByteBuffer.allocate(6);
 		bf.put(Command);
 		bf.put(SetSamplingInt);
@@ -105,6 +121,7 @@ public class Logger implements ILogger {
 
 	@Override
 	public Date getDateOfNextFrame() throws IOException {
+		log.debug("Get date of next frame");
 		dev.writeFrame(new byte[]{Command,GetTimeOfNextFrame});
 		byte[] resp = readCommandResponse(GetTimeOfNextFrame);
 		return DateAdapter.getDate(ByteArray.fromByteUInt32(resp));
@@ -112,15 +129,17 @@ public class Logger implements ILogger {
 
 
 	@Override
-	public long startData(int dataMode) throws IOException {
-		dev.writeFrame(new byte[]{Command,StartData,(byte)dataMode});
+	public long startData(byte dataMode) throws IOException {
+		log.debug("Starting data dump.");
+		dev.writeFrame(new byte[]{Command,StartData,dataMode});
 		byte[] resp = readCommandResponse(StartData);
 		return ByteArray.fromByteUInt32(resp);
 	}
 
 
 	@Override
-	public void stopData(int stopMode) throws IOException {
+	public void stopData(byte stopMode) throws IOException {
+		log.debug("Stopping data dump.");	
 		breakSocket();
 		dev.writeFrame(new byte[]{Command,StopData,(byte)stopMode});
 		readCommandResponse(StopData);
@@ -129,6 +148,7 @@ public class Logger implements ILogger {
 
 	@Override
 	public void startLiveData() throws IOException {
+		log.debug("Start live data");
 		dev.writeFrame(new byte[]{Command,StartLiveData});
 		readCommandResponse(StartLiveData);				
 	}
@@ -136,6 +156,7 @@ public class Logger implements ILogger {
 
 	@Override
 	public void stopLiveData() throws IOException {
+		log.debug("Stop live data");
 		dev.writeFrame(new byte[]{Command,StopLiveData});
 		readCommandResponse(StopLiveData);	
 		
@@ -144,6 +165,7 @@ public class Logger implements ILogger {
 
 	@Override
 	public String getVersion() throws IOException {
+		log.debug("Get version");
 		dev.writeFrame(new byte[]{Command,GetVersion});
 		byte[] resp = readCommandResponse(GetVersion);		
 		return new String(resp);
@@ -151,26 +173,30 @@ public class Logger implements ILogger {
 
 
 	@Override
-	public byte[] readData() throws IOException {		
+	public byte[] readData() throws IOException {
+		log.debug("readData");
 		return dev.readFrame();
 	}
 
 
 	@Override
 	public void breakSocket() throws IOException {
+		log.debug("breakSocket");
 		dev.stop();		
 	}
 
 
 	@Override
 	public void stopMode() throws IOException {
+		log.debug("stopMode");
 		dev.writeFrame(new byte[]{Command,ModeStop});
 		readCommandResponse(ModeStop);		
 	}
 
 
 	@Override
-	public long startBulkData(int dataMode) throws IOException {
+	public long startBulkData(byte dataMode) throws IOException {
+		log.debug("startBulkData mode:" +dataMode);
 		if (dataMode==DM_FULL){
 			dev.writeFrame(new byte[]{Command,StartBulkData});
 			byte[] resp = readCommandResponse(StartBulkData);
@@ -193,17 +219,21 @@ public class Logger implements ILogger {
 
 	@Override
 	public byte[] readBulk() throws IOException {
+		log.debug("readBulk");
 		return dev.readFrame();
 	}
 
 
 	@Override
-	public void sendBufferCommand(int command) throws IOException {
-		dev.writeFrame(new byte[]{BufferCommand,(byte)command});		
+	public void sendBufferCommand(byte command) throws IOException {
+		log.debug("sendBufferCommand command:" + ByteArray.toString(command));
+		dev.writeFrame(new byte[]{Command,BufferCommand,command});		
 		readCommandResponse(BufferCommand);		
 	}
 	
-	private byte[] readCommandResponse(byte command) throws IOException {		
+	private byte[] readCommandResponse(byte command) throws IOException {
+		log.debug("readCommandResponse command:" + ByteArray.toString(command));
+		
 		byte[] resp = dev.readFrame();
 		if (resp.length < 2){
 			throw new IOException("Invalid command response (too short).");			

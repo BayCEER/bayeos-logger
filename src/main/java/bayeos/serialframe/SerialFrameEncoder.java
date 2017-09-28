@@ -11,7 +11,7 @@ public class SerialFrameEncoder {
 	
 	
 	
-	static byte[] encodePayload(byte apiType, byte[] payload){
+	public static byte[] encodePayload(byte apiType, byte[] payload){
 		
 		ByteArrayOutputStream bout = new ByteArrayOutputStream(200);		
 		bout.write(frameDelimeter);
