@@ -28,7 +28,14 @@ public interface ILogger {
 	
 	
 	public String getVersion() throws IOException;
+	
+	public Boolean getBatteryStatus() throws IOException;
 
+	/**
+	 * Reads data in non blocking mode 
+	 * @return data|null
+	 * @throws IOException
+	 */
 	public byte[] readData() throws IOException;
 
 	public void breakSocket() throws IOException;
@@ -47,8 +54,7 @@ public interface ILogger {
 	 * @version 1.1
 	 */
 	public void sendBufferCommand(byte command) throws IOException;
-	
-    
+		
 	
 	
 	

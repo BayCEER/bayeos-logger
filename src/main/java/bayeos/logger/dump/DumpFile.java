@@ -74,7 +74,7 @@ public class DumpFile extends File {
 				
 				Map<String, Object> frame;
 				try {
-					frame = Parser.parse(data);	
+					frame = Parser.parse(data,new Date(),getOrigin(),null);	
 				if (!frame.containsKey("type")) {
 					log.error("Incomplete frame:" + frame.toString());
 					corruptFrameCount++;
@@ -101,11 +101,12 @@ public class DumpFile extends File {
 					if (ts.before(minDate)) {
 						minDate = ts;
 					}					
-					for(Entry<String, Float> d: ((Map<String,Float>)frame.get("value")).entrySet()) {
-						if (!stats.containsKey(d.getKey())){
-							stats.put(d.getKey(), new SummaryStatistics());							
-						}						
-						stats.get(d.getKey()).addValue(d.getValue());
+					for(Entry<String, Object> d: ((Map<String,Object>)frame.get("value")).entrySet()) {
+						String key = frame.get("origin") + "/" + d.getKey();
+						if (!stats.containsKey(key)){
+							stats.put(key, new SummaryStatistics());							
+						}												
+						stats.get(key).addValue(((Number)d.getValue()).doubleValue());
 					}
 					break;
 				case "Message":

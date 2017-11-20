@@ -10,6 +10,7 @@ import static bayeos.serialframe.SerialFrameConstants.frameDelimeter;
 
 import java.io.IOException;
 
+import bayeos.binary.ByteArray;
 import bayeos.binary.CheckSum;
 import bayeos.serialdevice.ISerialDevice;
 
@@ -38,25 +39,42 @@ public class SerialFrameDevice implements ISerialFrame {
 
 	@Override
 	public byte[] readFrame() throws IOException {
+		try {
 		return readFrame(api_data);
+		} catch (InvalidApiTypeException e) {
+			throw new IOException(e.getMessage());
+		}
 	}
 	
 	@Override
 	public void stop() throws IOException {
-		device.write(BREAK_FRAME);		
+		log.debug("stop()");
+		device.write(BREAK_FRAME);
+		while (device.read() != -1) {
+			// Skip all
+		}
+		
 	}
 		
 
 	
-	private void writeFrame(byte apiType, byte[] data) throws IOException {			
+	private void writeFrame(byte apiType, byte[] data) throws IOException {
+		log.debug("Write frame:" +ByteArray.toString(data));
 		device.write(SerialFrameEncoder.encodePayload(apiType, data));
-		readFrame(api_ack);
+		
+		try {
+			readFrame(api_ack);
+		} catch (InvalidApiTypeException e) {
+			log.error(e.getMessage());
+			stop();
+			writeFrame(apiType, data);
+		}
 	}
 	
 	
 			
 			
-	private byte[] readFrame(byte apiType) throws IOException {				
+	private byte[] readFrame(byte apiType) throws IOException, InvalidApiTypeException {				
 		log.debug("Waiting on start byte ...");
 		while (true){
 			int b = device.read();			
@@ -78,7 +96,7 @@ public class SerialFrameDevice implements ISerialFrame {
 		// Skip invalid response types 		
 		if (apiType!=api){
 			log.debug("Skipping invalid response.");
-			return readFrame(apiType);
+			throw new InvalidApiTypeException("Expected:" + String.valueOf(apiType) + " Read:" + String.valueOf(api) );			
 		}
 		
 		
@@ -103,6 +121,10 @@ public class SerialFrameDevice implements ISerialFrame {
 
 		log.debug("Writing ack ...");		
 		device.write(ACK_FRAME);
+		
+		if (log.isDebugEnabled()) {
+			log.debug("Read:" + ByteArray.toString(payload));
+		}
 		return payload;		 
 	}
 	
@@ -112,6 +134,12 @@ public class SerialFrameDevice implements ISerialFrame {
 	    	b =  0x20 ^ device.read();	
 	    } 	    
 	    return b;				
+	}
+
+
+	@Override
+	public boolean available() throws IOException {		
+		return device.available() > 0;
 	}
 
 

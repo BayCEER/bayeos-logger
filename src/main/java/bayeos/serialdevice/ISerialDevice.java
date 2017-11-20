@@ -12,15 +12,13 @@ import java.io.IOException;
 
 public interface ISerialDevice {
 		
-	
+			
 	/**
 	 * Reads a byte from input  
 	 * @return byte or -1 
 	 * @throws IOException
-	 */		
+	 */
 	public int read() throws IOException;
-	
-		
 	
 	/**
 	 * Writes bytes of data to output 
@@ -28,7 +26,13 @@ public interface ISerialDevice {
 	 * @throws IOException
 	 */	
 	public void write(byte[] data) throws IOException;
+
 	
+	/**
+	 * Number of bytes to be read nonblocking  
+	 * @throws IOException
+	 */
+	public int available() throws IOException;
 	
 	
 	

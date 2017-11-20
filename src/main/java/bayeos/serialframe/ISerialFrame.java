@@ -30,7 +30,7 @@ public interface ISerialFrame {
 		 * @throws IOException 
 		 */
 
-		byte[] readFrame() throws IOException;
+		public byte[] readFrame() throws IOException;
 										
 
 		
@@ -40,4 +40,12 @@ public interface ISerialFrame {
 		 */
 		public void stop() throws IOException;
 		
+		
+		
+		/**
+		 * Returns true if data is available 
+		 * @return
+		 * @throws IOException
+		 */
+		public boolean available() throws IOException;
 }

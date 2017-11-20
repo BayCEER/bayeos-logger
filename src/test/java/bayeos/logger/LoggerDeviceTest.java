@@ -20,13 +20,12 @@ import org.junit.rules.TemporaryFolder;
 
 import bayeos.frame.FrameParserException;
 import bayeos.frame.Parser;
-import bayeos.frame.types.MapUtils;
 import bayeos.serialframe.ComPortDevice;
 
 
 public class LoggerDeviceTest {
 
-	public final String comPort = "COM10";
+	public final String comPort = "COM45";
 
 	Logger logger = null;
 	ComPortDevice com = null;
@@ -36,16 +35,14 @@ public class LoggerDeviceTest {
 
 
 	@Before
-	public void setUp() throws Exception {
-		com = new ComPortDevice(comPort);
-		if (!com.open()) {
-			fail("Failed to open device");
-		}
+	public void setUp() throws IOException {
+		com = new ComPortDevice();
+		com.open(comPort);		
 		logger = new Logger(com);		
 	}
 
 	@After
-	public void tearDown() throws Exception {					
+	public void tearDown() throws IOException {					
 		com.close();
 	}
 
@@ -86,37 +83,8 @@ public class LoggerDeviceTest {
 		String version = logger.getVersion();
 		assertNotNull(version);		
 	}
+		
 	
-	@Test
-	public void dataFull() {
-		try {
-			long bytes = logger.startData(LoggerConstants.DM_FULL);
-			long bytesRead = 0;
-			long frameCount = 0;			
-			while (bytesRead < bytes) {
-				try {
-					byte data[] = logger.readData();					
-					System.out.println(MapUtils.toString(Parser.parse(data)));
-					frameCount++;
-					if (frameCount % 100 == 0)	System.out.print("+");
-					bytesRead += data.length;				
-				} catch (IOException e) {
-					System.out.println(e.getMessage());					
-				} catch (FrameParserException e) {
-					System.out.println(e.getMessage());	
-				}
-			}
-			System.out.println(frameCount + " Frames in " + bytesRead + " bytes received");
-			
-
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-
-	}
-	
-	
-
 	
 	@Test
 	public void sendBreak() {
@@ -160,11 +128,41 @@ public class LoggerDeviceTest {
 			byte[] data = null;			
 			while ((data = reader.readData())!=null){
 				Parser.parse(data);
-			}
-			
-																								
+			}																								
 	} 
 	
+	@Test
+	public void testLiveMode() {		
+			try {
+				logger.getVersion();
+				logger.startLiveData();	
+				long f = 0;
+				while(true) {
+					byte[] b = logger.readData();
+					if (b!= null) {
+						if (++f==2) break;	
+						try {
+							System.out.println("Frame: " + f + " Content:" + Parser.parse(b));
+						} catch (FrameParserException e) {
+							System.out.println(e.getMessage());
+						}																
+					} else {					
+						Thread.sleep(1000);					
+					}					
+				}				
+				logger.stopLiveData();
+				Thread.sleep(100000);
+									 				
+				if (com.available() > 0) {	
+					byte[] frame = logger.readData();					
+					fail("Found unexpexcted Frame:" + Parser.parse(frame));							
+				}
+								
+				
+			} catch (IOException | InterruptedException | FrameParserException e) {
+				fail(e.getMessage());
+			}
+	}
 
 	
 	

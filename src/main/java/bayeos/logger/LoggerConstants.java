@@ -19,6 +19,8 @@ public final class LoggerConstants {
 	public static final byte SetSamplingInt = 0xf;
 	public static final byte GetTimeOfNextFrame = 0x10;
 	public static final byte StartLiveData = 0x11;
+	public static final byte GetBatteryStatus = 0x16;
+	
 		
 	/* 
 	 Deprecated since 1.1  

@@ -20,6 +20,7 @@ import static bayeos.logger.LoggerConstants.StartData;
 import static bayeos.logger.LoggerConstants.StartLiveData;
 import static bayeos.logger.LoggerConstants.StopData;
 import static bayeos.logger.LoggerConstants.StopLiveData;
+import static bayeos.logger.LoggerConstants.GetBatteryStatus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,10 +36,10 @@ import bayeos.serialdevice.SerialDevice;
 import bayeos.serialframe.SerialFrameDevice;
 
 public class Logger implements ILogger {
-	
-	
-			
+					
 	private SerialFrameDevice dev;
+	
+	public float version = 1.4F;
 	
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Logger.class);
 	
@@ -101,10 +102,10 @@ public class Logger implements ILogger {
 		log.debug("Getting sampling interval");
 		dev.writeFrame(new byte[]{Command,GetSamplingInt});
 		byte[] resp = readCommandResponse(GetSamplingInt);
-		return ByteArray.fromByteInt16(resp);
-		
+		return ByteArray.fromByteInt16(resp);		
 	}
 
+	
 
 	@Override
 	public void setSamplingInterval(int interval) throws IOException {
@@ -157,8 +158,13 @@ public class Logger implements ILogger {
 	@Override
 	public void stopLiveData() throws IOException {
 		log.debug("Stop live data");
-		dev.writeFrame(new byte[]{Command,StopLiveData});
-		readCommandResponse(StopLiveData);	
+		if (version >= 1.3F) {
+			dev.writeFrame(new byte[]{Command,ModeStop});
+			readCommandResponse(ModeStop);				
+		} else {
+			dev.writeFrame(new byte[]{Command,StopLiveData});
+			readCommandResponse(StopLiveData);				
+		}
 		
 	}
 
@@ -167,15 +173,22 @@ public class Logger implements ILogger {
 	public String getVersion() throws IOException {
 		log.debug("Get version");
 		dev.writeFrame(new byte[]{Command,GetVersion});
-		byte[] resp = readCommandResponse(GetVersion);		
+		byte[] resp = readCommandResponse(GetVersion);
+		if (resp != null) {			
+			this.version = Float.valueOf(new String(resp));	
+		}		
 		return new String(resp);
 	}
 
 
 	@Override
 	public byte[] readData() throws IOException {
-		log.debug("readData");
-		return dev.readFrame();
+		if (log.isDebugEnabled()) log.debug("readData");				
+		if (dev.available()) {
+			return dev.readFrame();
+		} else {
+			return null;
+		}		 
 	}
 
 
@@ -238,8 +251,9 @@ public class Logger implements ILogger {
 		if (resp.length < 2){
 			throw new IOException("Invalid command response (too short).");			
 		} else {
-			if (resp[0] != CommandResponse || resp[1] != command){
+			if (resp[0] != CommandResponse || resp[1] != command){				
 				throw new IOException("Invalid command response (invalid command).");
+				
 			} else {
 				return Arrays.copyOfRange(resp, 2, resp.length);	
 			}			
@@ -247,8 +261,26 @@ public class Logger implements ILogger {
 	}
 
 
-	
-		
+	@Override
+	public Boolean getBatteryStatus() throws IOException {
+		log.debug("getBatteryStatus()");
+		if (version >= 1.4F) {
+			dev.writeFrame(new byte[]{Command,GetBatteryStatus});
+			byte[] resp = readCommandResponse(GetBatteryStatus);			
+			ByteBuffer bf = ByteBuffer.wrap(resp);
+			int mv = Short.toUnsignedInt(bf.getShort());
+			int limit = Short.toUnsignedInt(bf.getShort());			
+			if (mv == 0 || limit == 0) { 
+				return null;
+			} else {
+				return mv > limit;	
+			}					
+		} else {
+			return null;
+		}		
+	}
+
+
 	
 	
 }

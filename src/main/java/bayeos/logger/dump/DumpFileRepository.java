@@ -12,8 +12,8 @@ public class DumpFileRepository {
 		List<DumpFile> dumpFiles;
 		File d = new File(path);
 		if (!d.exists()) {
-			if (!d.mkdir())
-				throw new IOException("Failed to create directory.");
+			if (!d.mkdirs())
+				throw new IOException("Failed to create directory:" + d.getAbsolutePath());
 		}
 		dumpFiles = new ArrayList<DumpFile>();
 		for (File f : d.listFiles(new FilenameFilter() {

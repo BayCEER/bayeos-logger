@@ -1,86 +1,89 @@
 package bayeos.serialframe;
 
-import gnu.io.CommPortIdentifier;
-import gnu.io.NoSuchPortException;
-import gnu.io.PortInUseException;
-import gnu.io.RXTXPort;
-import gnu.io.SerialPort;
-import gnu.io.UnsupportedCommOperationException;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+
+import org.apache.log4j.Logger;
 
 import bayeos.serialdevice.ISerialDevice;
+import jssc.SerialPort;
+import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
+import jssc.SerialPortException;
+import jssc.SerialPortTimeoutException;
 
 public class ComPortDevice implements ISerialDevice {
-	
-	private String port;
-	private int baudrate;		 
-	private InputStream in;
-	private OutputStream out;
-	
-	private RXTXPort comm;
-
-	public ComPortDevice(String port, int baudrate) {
-		super();
-		this.port = port;
-		this.baudrate = baudrate;
-	}
-	
-	public ComPortDevice(String port) {
-		this(port,38400);
-	}
-	
-		
-	public void write(byte[] data) throws IOException {		
-		out.write(data);
-	}
-
-	public boolean open()  {		
-		CommPortIdentifier ident;
-		try {
-			ident = CommPortIdentifier.getPortIdentifier(port);
 			
-			comm = ident.open("SerialPort", 2000);
-			comm.enableReceiveTimeout(10000);
-			comm.setSerialPortParams(baudrate, SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
-			comm.notifyOnDataAvailable(true);
+	private SerialPort port;
+	private int available;
+	private int timeout = 10000;
+	
+	private static final Logger log = Logger.getLogger(ComPortDevice.class);
+
+	public void open(String portName) throws IOException{
+		port = new SerialPort(portName);
+				
+		try {
+			port.openPort();
+			port.setParams(SerialPort.BAUDRATE_38400,
+			        SerialPort.DATABITS_8,
+			        SerialPort.STOPBITS_1,
+			        SerialPort.PARITY_NONE);
+						
+			port.addEventListener(new SerialPortEventListener() {
+				@Override
+				public void serialEvent(SerialPortEvent event) {
+						if (event.isRXCHAR()) {							
+							available = event.getEventValue();
+							log.debug("Available:" + available);
+						}
+					
+				}
+			});
+
+		} catch (SerialPortException e) {
+			throw new IOException(e);
+		}
 		
-			in = comm.getInputStream();
-			out = comm.getOutputStream();
-		} catch (NoSuchPortException|PortInUseException|UnsupportedCommOperationException e) {			
-			e.printStackTrace();
-			return false;
-		} 
-		System.out.println("Device on port:" + port + " opened.");
-		return true;
+	}
+	
+	public void close() throws IOException{
+		try {
+			port.closePort();
+		} catch (SerialPortException e) {
+			throw new IOException(e);
+		}
+		
 	}
 
-	public void close() {	
-		if (comm!=null){
-			try {
-				in.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				out.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			comm.close();
+	@Override
+	public int read() throws IOException {		
+		try {
+			byte[] b = port.readBytes(1,timeout);
+			if (available> 0) {
+				available--;
+			} 	
+			return 0xff & b[0];			
+		} catch (SerialPortException | SerialPortTimeoutException e) {
+			throw new IOException(e.getMessage());
 		}
 	}
 
-	public int read() throws IOException {		
-		return in.read();		
+	@Override
+	public void write(byte[] data) throws IOException {
+			try {
+				port.writeBytes(data);
+			} catch (SerialPortException e) {
+				throw new IOException(e.getMessage());
+			}
+		
 	}
-
 	
 
+	@Override
+	public int available() throws IOException {
+		return available;
+	}
+	
 	
 
 }
