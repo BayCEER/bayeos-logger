@@ -1,2 +1,2 @@
-# bayeos-frame
-BayEOS Frame for Java
+# bayeos-logger
+BayEOS Logger interface for Java
