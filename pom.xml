@@ -4,14 +4,14 @@
   <groupId>de.unibayreuth.bayceer.bayeos</groupId>
   <artifactId>bayeos-logger</artifactId>
   <packaging>jar</packaging>
-  <version>2.3</version>
+  <version>3.0.2</version>
   <name>bayeos-logger</name>
   
   <properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>		
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>	
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>	
 	</properties>
 
 	
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>de.unibayreuth.bayceer.bayeos</groupId>
 			<artifactId>bayeos-frame-parser</artifactId>
-			<version>1.2.1</version>			
+			<version>1.3.0</version>			
 		</dependency>	
 		<dependency>
    			 <groupId>org.slf4j</groupId>
@@ -46,12 +46,21 @@
     		<version>2.7.0</version>
     		<scope>test</scope>
   		</dependency>
+  		
+  		<!-- <dependency>
+  		<groupId>com.fazecast</groupId>
+  		<artifactId>jSerialComm</artifactId>
+ 		 <version>[2.0.0,3.0.0)</version>
+  			<scope>test</scope>
+  		</dependency>
+  		 -->
   		<dependency>
   			<groupId>org.scream3r</groupId>
 	  		<artifactId>jssc</artifactId>
   			<version>2.8.0</version>
   			<scope>test</scope>
   		</dependency>
+  		
 		
 		<dependency>
 			<groupId>org.slf4j</groupId>

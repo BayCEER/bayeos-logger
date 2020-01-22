@@ -28,11 +28,7 @@ public interface ISerialDevice {
 	public void write(byte[] data) throws IOException;
 
 	
-	/**
-	 * Number of bytes to be read nonblocking  
-	 * @throws IOException
-	 */
-	public int available() throws IOException;
+	
 	
 	
 	

@@ -24,13 +24,6 @@ public class SerialDevice implements ISerialDevice {
 	public void write(byte[] data) throws IOException {
 		out.write(data);		
 	}
-
-	@Override
-	public int available() throws IOException {
-		return in.available();
-		
-	}
-	
 	
 	
 	

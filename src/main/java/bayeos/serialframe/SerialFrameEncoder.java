@@ -10,9 +10,8 @@ import bayeos.binary.CheckSum;
 public class SerialFrameEncoder {
 	
 	
-	
-	public static byte[] encodePayload(byte apiType, byte[] payload){
 		
+	public static byte[] encodePayload(byte apiType, byte[] payload){	
 		ByteArrayOutputStream bout = new ByteArrayOutputStream(200);		
 		bout.write(frameDelimeter);
 		writeEscaped(bout, (byte) payload.length);
@@ -27,8 +26,6 @@ public class SerialFrameEncoder {
 		return bout.toByteArray();		
 	}
 	
-	
-				
 	
 	 
 	private static void writeEscaped(ByteArrayOutputStream b, byte value)  {

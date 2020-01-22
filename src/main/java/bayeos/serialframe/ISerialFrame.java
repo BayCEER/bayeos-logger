@@ -35,17 +35,11 @@ public interface ISerialFrame {
 
 		
 		/**
-		 * Stop 
+		 * Sends a break 
 		 * @throws IOException
 		 */
-		public void stop() throws IOException;
+		public void breakFrame() throws IOException;
 		
 		
 		
-		/**
-		 * Returns true if data is available 
-		 * @return
-		 * @throws IOException
-		 */
-		public boolean available() throws IOException;
 }

@@ -24,6 +24,9 @@ public class BulkReader {
 
 	public byte[] readData() throws IOException {
 				
+		// [0-3] timestamp
+		// [4] 	 length
+		// [5:]  body
 		
 		byte[] head = new byte[5];		
 		int b = in.read(head);

@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
+import org.apache.log4j.Level;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,15 +21,18 @@ import org.junit.rules.TemporaryFolder;
 
 import bayeos.frame.FrameParserException;
 import bayeos.frame.Parser;
-import bayeos.serialframe.ComPortDevice;
+import bayeos.serialdevice.ComPortDevice;
 
 
-public class LoggerDeviceTest {
+public class LoggerTest {
 
-	public final String comPort = "COM45";
 
 	Logger logger = null;
 	ComPortDevice com = null;
+	
+	
+	public final org.apache.log4j.Logger log = org.apache.log4j.Logger.getRootLogger();	
+
 	
 	@Rule
 	public TemporaryFolder testFolder = new TemporaryFolder();
@@ -36,8 +40,9 @@ public class LoggerDeviceTest {
 
 	@Before
 	public void setUp() throws IOException {
+		log.setLevel(Level.DEBUG);
 		com = new ComPortDevice();
-		com.open(comPort);		
+		com.openLastPort();		
 		logger = new Logger(com);		
 	}
 
@@ -47,17 +52,14 @@ public class LoggerDeviceTest {
 	}
 
 	@Test
-	public void setName() throws Exception {
-		System.out.println("Set name");
-		logger.setName("Hallo");
-		System.out.println("Get name");
-		assertEquals("Hallo", logger.getName());
+	public void setName() throws Exception {		
+		logger.setName(NameGenerator.generateName());		
 	}
 
 	
 	@Test
 	public void setTime() throws Exception {
-		System.out.println("Set Time");
+		log.debug("Set Time");
 		Date a = new Date();
 		logger.setTime(a);
 		try {
@@ -71,7 +73,7 @@ public class LoggerDeviceTest {
 	
 	@Test
 	public void setSamplingInterval() throws Exception {
-		System.out.println("Set sampling interval");
+		log.debug("Set sampling interval");
 		logger.setSamplingInterval(60);
 		
 		assertEquals(60, logger.getSamplingInterval());				
@@ -79,7 +81,7 @@ public class LoggerDeviceTest {
 	
 	@Test 
 	public void getVersion() throws Exception {
-		System.out.println("Get Version");
+		log.debug("Get Version");
 		String version = logger.getVersion();
 		assertNotNull(version);		
 	}
@@ -101,20 +103,20 @@ public class LoggerDeviceTest {
 	public void readAndParseBulk() throws IOException, FrameParserException {
 							
 			File file = testFolder.newFile("BAYEOS.DB");
-			// file.deleteOnExit();			
-			System.out.println("Dumping to " + file.getAbsolutePath());
+			file.deleteOnExit();			
+			log.debug("Dumping to " + file.getAbsolutePath());
 			BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(file));
 			BulkWriter bWriter = new BulkWriter(bout);
 			long read = 0;			
 			long bytes = logger.startBulkData(LoggerConstants.DM_FULL);
-			System.out.println("Reading:" + bytes + " Bytes");
+			log.debug("Reading:" + bytes + " Bytes");
 									
 			long c = 0;
 			while (read < bytes) {
-				System.out.println(c++);
-				System.out.println( + read + "/" + bytes + " bytes");
+				log.debug(c++);
+				log.debug( + read + "/" + bytes + " bytes");
 				byte[] bulk = logger.readBulk();
-				System.out.println("Bulk size:" + bulk.length);
+				log.debug("Bulk size:" + bulk.length);
 				bWriter.write(bulk);
 				bout.flush();
 				read = read + bulk.length-5;												
@@ -122,7 +124,7 @@ public class LoggerDeviceTest {
 			}
 			bout.flush();
 			bout.close();
-			System.out.println("Read:" + read + " Bytes");			
+			log.debug("Read:" + read + " Bytes");			
 			
 			BulkReader reader = new BulkReader(new FileInputStream(file));									
 			byte[] data = null;			
@@ -142,24 +144,19 @@ public class LoggerDeviceTest {
 					if (b!= null) {
 						if (++f==2) break;	
 						try {
-							System.out.println("Frame: " + f + " Content:" + Parser.parse(b));
+							log.debug("Frame: " + f + " Content:" + Parser.parse(b));
 						} catch (FrameParserException e) {
-							System.out.println(e.getMessage());
+							log.error(e.getMessage());
 						}																
 					} else {					
 						Thread.sleep(1000);					
 					}					
 				}				
 				logger.stopLiveData();
-				Thread.sleep(100000);
-									 				
-				if (com.available() > 0) {	
-					byte[] frame = logger.readData();					
-					fail("Found unexpexcted Frame:" + Parser.parse(frame));							
-				}
-								
-				
-			} catch (IOException | InterruptedException | FrameParserException e) {
+													 				
+									
+												
+			} catch (IOException | InterruptedException e) {
 				fail(e.getMessage());
 			}
 	}

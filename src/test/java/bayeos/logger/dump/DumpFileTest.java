@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -27,6 +28,17 @@ public class DumpFileTest {
 		assertNotNull(d.getInfo());		
 		System.out.println(d.getInfo());
 	}
+	
+	
+	@Test
+	public void testInfoCorrupt() throws IOException {
+		String filePath = "src/test/resources/DummyD_2020-01-21-09-15-21.db ";		
+		DumpFile d = new DumpFile(filePath);	
+		Map<String, Object> f = d.getInfo();				
+		assertEquals(2L, f.get("CorruptFrameCount"));
+			
+	}
+	
 	
 
 }

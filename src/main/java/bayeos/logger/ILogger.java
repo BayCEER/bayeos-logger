@@ -14,7 +14,7 @@ public interface ILogger {
 	public Date setTime(Date date) throws IOException;
 
 	public int getSamplingInterval() throws IOException;
-	public void setSamplingInterval(int interval) throws IOException;
+	public int setSamplingInterval(int interval) throws IOException;
 
 	public Date getDateOfNextFrame() throws IOException;
 

@@ -1,25 +1,21 @@
-package bayeos.serialframe;
+package bayeos.serialdevice;
 
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import bayeos.serialdevice.ISerialDevice;
 import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
-import jssc.SerialPortTimeoutException;
+import jssc.SerialPortList;
 
 public class ComPortDevice implements ISerialDevice {
 			
 	private SerialPort port;
-	private int available;
-	private int timeout = 10000;
-	
+			
 	private static final Logger log = Logger.getLogger(ComPortDevice.class);
 
 	public void open(String portName) throws IOException{
+		log.debug("Open " + portName);
 		port = new SerialPort(portName);
 				
 		try {
@@ -28,42 +24,56 @@ public class ComPortDevice implements ISerialDevice {
 			        SerialPort.DATABITS_8,
 			        SerialPort.STOPBITS_1,
 			        SerialPort.PARITY_NONE);
-						
-			port.addEventListener(new SerialPortEventListener() {
-				@Override
-				public void serialEvent(SerialPortEvent event) {
-						if (event.isRXCHAR()) {							
-							available = event.getEventValue();
-							log.debug("Available:" + available);
-						}
-					
-				}
-			});
+									
 
 		} catch (SerialPortException e) {
 			throw new IOException(e);
-		}
-		
+		}		
 	}
 	
-	public void close() throws IOException{
+	public void close() {
 		try {
-			port.closePort();
+			if (port.purgePort(SerialPort.PURGE_RXCLEAR|SerialPort.PURGE_TXCLEAR)) {
+				log.debug("Port purged.");
+			};			
+			if (port.closePort()) {
+				log.debug("Port closed.");
+			} else {
+				log.error("Failed to close port");
+			};			
+			try {
+				// Wait until port is really closed
+				Thread.sleep(200);
+			} catch (InterruptedException e) {			
+			}
 		} catch (SerialPortException e) {
-			throw new IOException(e);
+			log.error(e.getMessage());
 		}
-		
 	}
 
+	
+	public void openLastPort() throws IOException {
+		String[] names = SerialPortList.getPortNames();		
+		if (names.length>0) {
+			open(names[names.length-1]);
+		} else {
+			throw new IOException("No serial port found.");
+			
+		}
+	}
+	
+	
 	@Override
 	public int read() throws IOException {		
-		try {
-			byte[] b = port.readBytes(1,timeout);
-			if (available> 0) {
-				available--;
-			} 	
-			return 0xff & b[0];			
-		} catch (SerialPortException | SerialPortTimeoutException e) {
+		try {		
+			if (port.isOpened()) {
+				byte[] b = port.readBytes(1);
+				return 0xff & b[0];	
+			} else {
+				throw new IOException("Port already closed.");
+			}
+			 			
+		} catch (SerialPortException e) {
 			throw new IOException(e.getMessage());
 		}
 	}
@@ -79,10 +89,7 @@ public class ComPortDevice implements ISerialDevice {
 	}
 	
 
-	@Override
-	public int available() throws IOException {
-		return available;
-	}
+	
 	
 	
 

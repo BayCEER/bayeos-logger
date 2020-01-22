@@ -47,12 +47,9 @@ public class SerialFrameDevice implements ISerialFrame {
 	}
 	
 	@Override
-	public void stop() throws IOException {
+	public void breakFrame() throws IOException {
 		log.debug("stop()");
 		device.write(BREAK_FRAME);
-		while (device.read() != -1) {
-			// Skip all
-		}
 		
 	}
 		
@@ -66,7 +63,7 @@ public class SerialFrameDevice implements ISerialFrame {
 			readFrame(api_ack);
 		} catch (InvalidApiTypeException e) {
 			log.error(e.getMessage());
-			stop();
+			breakFrame();
 			writeFrame(apiType, data);
 		}
 	}
@@ -74,8 +71,11 @@ public class SerialFrameDevice implements ISerialFrame {
 	
 			
 			
-	private byte[] readFrame(byte apiType) throws IOException, InvalidApiTypeException {				
-		log.debug("Waiting on start byte ...");
+	private byte[] readFrame(byte apiType) throws IOException, InvalidApiTypeException {
+		
+		log.debug("Read " + ((apiType==api_data)?"data":"acknowledge") + " frame");
+		
+		log.debug("Waiting for start byte");
 		while (true){
 			int b = device.read();			
 			if (b == frameDelimeter) {
@@ -91,8 +91,9 @@ public class SerialFrameDevice implements ISerialFrame {
 		}
 		
 		// Read api
-		int api = readByteEscaped();
-		
+		int api = readByteEscaped();		
+		log.debug("On " + ((api==api_data)?"data":"acknowledge") + " frame");
+								
 		// Skip invalid response types 		
 		if (apiType!=api){
 			log.debug("Skipping invalid response.");
@@ -123,7 +124,7 @@ public class SerialFrameDevice implements ISerialFrame {
 		device.write(ACK_FRAME);
 		
 		if (log.isDebugEnabled()) {
-			log.debug("Read:" + ByteArray.toString(payload));
+			log.debug("Payload:" + ByteArray.toString(payload));
 		}
 		return payload;		 
 	}
@@ -137,10 +138,10 @@ public class SerialFrameDevice implements ISerialFrame {
 	}
 
 
-	@Override
-	public boolean available() throws IOException {		
-		return device.available() > 0;
-	}
+//	@Override
+//	public boolean available() throws IOException {		
+//		return device.available() > 0;
+//	}
 
 
 

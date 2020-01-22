@@ -6,6 +6,7 @@ import static bayeos.logger.LoggerConstants.BC_GET_READ_POS;
 import static bayeos.logger.LoggerConstants.BufferCommand;
 import static bayeos.logger.LoggerConstants.DM_FULL;
 import static bayeos.logger.LoggerConstants.DM_NEW;
+import static bayeos.logger.LoggerConstants.GetBatteryStatus;
 import static bayeos.logger.LoggerConstants.GetName;
 import static bayeos.logger.LoggerConstants.GetSamplingInt;
 import static bayeos.logger.LoggerConstants.GetTime;
@@ -20,12 +21,12 @@ import static bayeos.logger.LoggerConstants.StartData;
 import static bayeos.logger.LoggerConstants.StartLiveData;
 import static bayeos.logger.LoggerConstants.StopData;
 import static bayeos.logger.LoggerConstants.StopLiveData;
-import static bayeos.logger.LoggerConstants.GetBatteryStatus;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -52,8 +53,7 @@ public class Logger implements ILogger {
 		this(new SerialDevice(in, out));
 	}
 	
-	
-		
+			
 	@Override
 	public String getName() throws IOException {	
 		log.debug("Getting name of device");	
@@ -70,7 +70,11 @@ public class Logger implements ILogger {
 		bf.put(SetName);
 		bf.put(name.getBytes());						
 		dev.writeFrame(bf.array());				
-		readCommandResponse(SetName);		
+		byte[] resp = readCommandResponse(SetName);
+		String newName = new String(resp); 
+		if (!newName.equals(name)) {
+			throw new IOException("Expected:" + name + " was:" + newName);
+		}
 	}
 
 
@@ -108,15 +112,15 @@ public class Logger implements ILogger {
 	
 
 	@Override
-	public void setSamplingInterval(int interval) throws IOException {
+	public int setSamplingInterval(int interval) throws IOException {
 		log.debug("Set sampling interval");
 		ByteBuffer bf = ByteBuffer.allocate(6);
 		bf.put(Command);
 		bf.put(SetSamplingInt);
 		bf.put(ByteArray.toByteInt16((short)interval));
-		dev.writeFrame(bf.array());
-		
-		readCommandResponse(SetSamplingInt);	
+		dev.writeFrame(bf.array());		
+		byte[] resp = readCommandResponse(SetSamplingInt);
+		return ByteArray.fromByteInt16(resp);
 	}
 
 
@@ -184,18 +188,15 @@ public class Logger implements ILogger {
 	@Override
 	public byte[] readData() throws IOException {
 		if (log.isDebugEnabled()) log.debug("readData");				
-		if (dev.available()) {
-			return dev.readFrame();
-		} else {
-			return null;
-		}		 
+		return dev.readFrame();
+				 
 	}
 
 
 	@Override
 	public void breakSocket() throws IOException {
 		log.debug("breakSocket");
-		dev.stop();		
+		dev.breakFrame();		
 	}
 
 
@@ -268,8 +269,9 @@ public class Logger implements ILogger {
 			dev.writeFrame(new byte[]{Command,GetBatteryStatus});
 			byte[] resp = readCommandResponse(GetBatteryStatus);			
 			ByteBuffer bf = ByteBuffer.wrap(resp);
-			int mv = Short.toUnsignedInt(bf.getShort());
-			int limit = Short.toUnsignedInt(bf.getShort());			
+			bf.order(ByteOrder.LITTLE_ENDIAN);			
+			int mv = Short.toUnsignedInt(bf.getShort()); 
+			int limit = Short.toUnsignedInt(bf.getShort()); 			
 			if (mv == 0 || limit == 0) { 
 				return null;
 			} else {
