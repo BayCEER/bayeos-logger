@@ -4,7 +4,7 @@
   <groupId>de.unibayreuth.bayceer.bayeos</groupId>
   <artifactId>bayeos-logger</artifactId>
   <packaging>jar</packaging>
-  <version>3.0.2</version>
+  <version>3.0.3</version>
   <name>bayeos-logger</name>
   
   <properties>

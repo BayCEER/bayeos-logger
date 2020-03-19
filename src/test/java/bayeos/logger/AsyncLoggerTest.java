@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Date;
 import java.util.Random;
 
@@ -17,6 +18,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -55,6 +57,7 @@ public class AsyncLoggerTest {
 	}
 
 	@Test
+	@Ignore
 	public void setName() {
 		try {
 			String name = NameGenerator.generateName() + " " + NameGenerator.generateName();			
@@ -67,6 +70,7 @@ public class AsyncLoggerTest {
 	}
 
 	@Test
+	@Ignore
 	public void setTime() {
 		try {
 			Date a = new Date();			
@@ -84,11 +88,12 @@ public class AsyncLoggerTest {
 	
 	
 	@Test
+	@Ignore
 	public void setSamplingInterval()  {		
 		try {
 		    Random rand = new Random();
 			int i = 60 + rand.nextInt(120);				
-			int d = logger.setSamplingInterval(i);			
+			int d = logger.setLoggingInterval(i);			
 			assertEquals(i,d);
 		} catch (IOException e) {
 			fail(e.getMessage());
@@ -98,12 +103,14 @@ public class AsyncLoggerTest {
 	}
 	
 	@Test 
+	@Ignore
 	public void getVersion() throws Exception {
 		String version = logger.getVersion();
 		assertNotNull(version);		
 	}
 	
 	@Test
+	@Ignore
 	public void sendBreak() {
 		try {
 			logger.breakSocket();
@@ -113,13 +120,14 @@ public class AsyncLoggerTest {
 	}
 	
 	@Test
+	@Ignore
 	public void readAndParseBulk() throws IOException, FrameParserException {
 							
 			File file = testFolder.newFile("BAYEOS.DB");
 			file.deleteOnExit();			
 			log.debug("Dumping to " + file.getAbsolutePath());
-			BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(file));
-			BulkWriter bWriter = new BulkWriter(bout);
+			RandomAccessFile ra = new RandomAccessFile(file, "rw");
+			BulkWriter bWriter = new BulkWriter(ra);
 			long read = 0;			
 			long bytes = logger.startBulkData(LoggerConstants.DM_FULL);
 			log.debug("Reading:" + bytes + " Bytes");
@@ -130,13 +138,11 @@ public class AsyncLoggerTest {
 				log.debug( + read + "/" + bytes + " bytes");
 				byte[] bulk = logger.readBulk();
 				log.debug("Bulk size:" + bulk.length);
-				bWriter.write(bulk);
-				bout.flush();
+				bWriter.write(bulk);			
 				read = read + bulk.length-5;												
 												
 			}
-			bout.flush();
-			bout.close();
+			ra.close();
 			log.debug("Read:" + read + " Bytes");			
 			
 			BulkReader reader = new BulkReader(new FileInputStream(file));									
@@ -147,6 +153,7 @@ public class AsyncLoggerTest {
 	} 
 
 	@Test
+	@Ignore
 	public void testLiveMode() {		
 			try {
 				logger.getVersion();

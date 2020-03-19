@@ -29,7 +29,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Date;
-
 import bayeos.binary.ByteArray;
 import bayeos.frame.DateAdapter;
 import bayeos.serialdevice.ISerialDevice;
@@ -102,7 +101,7 @@ public class Logger implements ILogger {
 
 
 	@Override
-	public int getSamplingInterval() throws IOException {
+	public int getLoggingInterval() throws IOException {
 		log.debug("Getting sampling interval");
 		dev.writeFrame(new byte[]{Command,GetSamplingInt});
 		byte[] resp = readCommandResponse(GetSamplingInt);
@@ -112,7 +111,7 @@ public class Logger implements ILogger {
 	
 
 	@Override
-	public int setSamplingInterval(int interval) throws IOException {
+	public int setLoggingInterval(int interval) throws IOException {
 		log.debug("Set sampling interval");
 		ByteBuffer bf = ByteBuffer.allocate(6);
 		bf.put(Command);

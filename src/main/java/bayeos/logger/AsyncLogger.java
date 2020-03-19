@@ -103,7 +103,7 @@ public class AsyncLogger implements ILogger {
 
 
 	@Override
-	public int getSamplingInterval() throws IOException {
+	public int getLoggingInterval() throws IOException {
 		log.debug("Getting sampling interval");
 		byte[] resp = readCommandResponse(GetSamplingInt,writeReadFrame(new byte[]{Command,GetSamplingInt}));
 		return ByteArray.fromByteInt16(resp);
@@ -111,7 +111,7 @@ public class AsyncLogger implements ILogger {
 
 
 	@Override
-	public int setSamplingInterval(int interval) throws IOException {
+	public int setLoggingInterval(int interval) throws IOException {
 		ByteBuffer bf = ByteBuffer.allocate(6);
 		bf.put(Command);
 		bf.put(SetSamplingInt);

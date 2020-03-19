@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Date;
 
 import org.apache.log4j.Level;
@@ -74,9 +75,9 @@ public class LoggerTest {
 	@Test
 	public void setSamplingInterval() throws Exception {
 		log.debug("Set sampling interval");
-		logger.setSamplingInterval(60);
+		logger.setLoggingInterval(60);
 		
-		assertEquals(60, logger.getSamplingInterval());				
+		assertEquals(60, logger.getLoggingInterval());				
 	}
 	
 	@Test 
@@ -105,8 +106,8 @@ public class LoggerTest {
 			File file = testFolder.newFile("BAYEOS.DB");
 			file.deleteOnExit();			
 			log.debug("Dumping to " + file.getAbsolutePath());
-			BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(file));
-			BulkWriter bWriter = new BulkWriter(bout);
+			RandomAccessFile ra = new RandomAccessFile(file, "rw");			
+			BulkWriter bWriter = new BulkWriter(ra);
 			long read = 0;			
 			long bytes = logger.startBulkData(LoggerConstants.DM_FULL);
 			log.debug("Reading:" + bytes + " Bytes");
@@ -117,13 +118,11 @@ public class LoggerTest {
 				log.debug( + read + "/" + bytes + " bytes");
 				byte[] bulk = logger.readBulk();
 				log.debug("Bulk size:" + bulk.length);
-				bWriter.write(bulk);
-				bout.flush();
+				bWriter.write(bulk);				
 				read = read + bulk.length-5;												
 												
 			}
-			bout.flush();
-			bout.close();
+			ra.close();
 			log.debug("Read:" + read + " Bytes");			
 			
 			BulkReader reader = new BulkReader(new FileInputStream(file));									

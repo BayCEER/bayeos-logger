@@ -9,9 +9,11 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import bayeos.serialdevice.ComPortDevice;
+
 
 public class AsyncSerialDeviceTest {
 
@@ -34,6 +36,7 @@ public class AsyncSerialDeviceTest {
 	}
 
 	@Test
+	@Ignore
 	public void readBlocking() {
 		
 		try {
